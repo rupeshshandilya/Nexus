@@ -1,7 +1,36 @@
+"use client";
+
+import { useTheme } from "next-themes";
 import Image from "next/image";
+import { useCallback, useEffect } from "react";
+import isHotkey from 'is-hotkey';
 
 export default function Home() {
+  const { setTheme } = useTheme();
+
+  const handlekeyDown = useCallback((event: KeyboardEvent) => {
+    if (isHotkey("mod+l", event)) {
+      event.preventDefault();
+      setTheme("light");
+    }
+    if (isHotkey("mod+d", event)) {
+      event.preventDefault();
+      setTheme("dark");
+    }
+    if (isHotkey("mod+s", event)) {
+      event.preventDefault();
+      setTheme("system");
+    }
+  },[]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handlekeyDown);
+
+    // unmount component
+    return () => document.removeEventListener("keydown", handlekeyDown);
+  }, [handlekeyDown]);
   return (
+    <>
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <Image
@@ -97,5 +126,6 @@ export default function Home() {
         </a>
       </footer>
     </div>
+    </>
   );
 }
