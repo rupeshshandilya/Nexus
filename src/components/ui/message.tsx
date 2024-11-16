@@ -1,5 +1,6 @@
 import { Flex, Text } from '@radix-ui/themes';
 import { useEffect, useState } from 'react';
+import { Icons } from './icons';
 
 const Message = ({
   message,
@@ -24,7 +25,7 @@ const Message = ({
   return (
     <Flex align='center' justify='center' className={className}>
       <Flex align='center' justify='center'>
-        {loading && <p>Spinner</p>}
+        {loading && <Icons.spinner className='mr-2 h-5 w-5 animate-spin'/>}
         <Text align='center' as='p'>
           {loading ? 'Loading...' : splitedMessage}
         </Text>
