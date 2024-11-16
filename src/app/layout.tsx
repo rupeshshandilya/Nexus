@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/providers";
-// import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/navbar";
 
 
 const geistSans = localFont({
@@ -26,12 +26,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
-        {/* <Navbar /> */}
+        <div className="relative w-full flex items-center justify-center">
+        <Navbar />
+        </div>
         <Providers>
           {children}
         </Providers>
