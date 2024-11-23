@@ -3,9 +3,10 @@
 import { useTheme } from "next-themes";
 import { useCallback, useEffect } from "react";
 import isHotkey from 'is-hotkey';
-import { Spotlight } from "@/components/spotlight";
+// import { Spotlight } from "@/components/spotlight";
 import { useDeviceType } from "@/hooks/device-type";
 import Message from "@/components/ui/message";
+import HeroSection from "@/components/herosection";
 
 export default function Home() {
   const {isDesktop, width} = useDeviceType()
@@ -34,7 +35,8 @@ export default function Home() {
   }, [handlekeyDown]);
 
   return isDesktop && width! > 1280 ? (
-    <Spotlight />
+    // <Spotlight />
+    <HeroSection />
   ): (
     <Message message="Hey 👋🏻 there! Nexus is only Optimized for desktop. Support for Mobile is comming soon!"
     className="h-screen"/>
