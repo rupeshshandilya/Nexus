@@ -3,13 +3,14 @@
 import { account } from "@/appwrite/config"
 import { Button } from "./ui/button"
 import { Github } from 'lucide-react'
+import { OAuthProvider } from "appwrite"
 
 export default function LoginButton() {
   async function handleLogin() {
-    account.createOAuth2Session(
-        "github",
-        'http://localhost:3000/',
-        'http://localhost:3000/'
+    await account.createOAuth2Session(
+     OAuthProvider.Github,
+        'http://localhost:3000',
+        'http://localhost:3000'
     )
   }
 

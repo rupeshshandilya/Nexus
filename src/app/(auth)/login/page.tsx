@@ -1,3 +1,4 @@
+"use client"
 import LoginButton from '@/components/LoginButton'
 import Image from 'next/image'
 import React from 'react'
