@@ -13,11 +13,11 @@ export default function Home() {
   const { setTheme } = useTheme();
 
   const handlekeyDown = useCallback((event: KeyboardEvent) => {
-    if (isHotkey("mod+l", event)) {
+    if (isHotkey("mod+k", event)) {
       event.preventDefault();
       setTheme("light");
     }
-    if (isHotkey("mod+d", event)) {
+    if (isHotkey("mod+m", event)) {
       event.preventDefault();
       setTheme("dark");
     }
@@ -35,7 +35,6 @@ export default function Home() {
   }, [handlekeyDown]);
 
   return isDesktop && width! > 1280 ? (
-    // <Spotlight />
     <HeroSection />
   ): (
     <Message message="Hey 👋🏻 there! Nexus is only Optimized for desktop. Support for Mobile is comming soon!"

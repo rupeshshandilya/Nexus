@@ -15,7 +15,9 @@ export function Navbar({ className }: { className?: string }) {
     >
       <Menu setActive={setActive}>
         {/* For Login User */}
+        <Link href='http://localhost:3000/login'>
         <MenuItem setActive={setActive} active={active} item="Login"></MenuItem>
+        </Link>
 
         {/* For Github Repo */}
         <Link href="https://github.com/rupeshshandilya/Nexus">
