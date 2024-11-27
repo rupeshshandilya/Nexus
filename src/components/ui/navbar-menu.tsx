@@ -13,8 +13,8 @@ const transition = {
   restSpeed: 0.001,
 };
 
-interface HoveredLinkProps extends LinkProps{
-  children: React.ReactNode,
+interface HoveredLinkProps extends LinkProps {
+  children: React.ReactNode;
 }
 
 export const MenuItem = ({
@@ -22,17 +22,20 @@ export const MenuItem = ({
   active,
   item,
   children,
+  onClick,
 }: {
   setActive: (item: string) => void;
   active: string | null;
   item: string;
   children?: React.ReactNode;
+  onClick?: () => void;
 }) => {
   return (
     <div onMouseEnter={() => setActive(item)} className="relative ">
       <motion.p
         transition={{ duration: 0.3 }}
         className="cursor-pointer text-black hover:opacity-[0.9] dark:text-white"
+        onClick={onClick}
       >
         {item}
       </motion.p>

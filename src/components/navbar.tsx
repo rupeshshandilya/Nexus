@@ -53,11 +53,11 @@ export function Navbar({ className }: { className?: string }) {
         </Link>
 
         {user && (
-          <button
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+          <MenuItem
+          setActive={setActive}
+          active={active}
+          item="Logout"
+          onClick={handleLogout}></MenuItem>
         )}
       </Menu>
     </div>
