@@ -1,33 +1,13 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Menu, MenuItem } from "../components/ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { getUserDetails } from "@/app/actions/getUserDetails";
-import { account } from "@/appwrite/config";
+import { useUser } from "@clerk/nextjs";
 
 export function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
-  const [user, setUser] = useState("");
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userDetails = await getUserDetails();
-      if (userDetails) {
-        setUser(userDetails.name);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  async function handleLogout() {
-    try {
-      await account.deleteSession("current");
-      setUser("");
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const { user,isSignedIn } = useUser();
 
   return (
     <div
@@ -35,13 +15,23 @@ export function Navbar({ className }: { className?: string }) {
     >
       <Menu setActive={setActive}>
         {/* For Login User */}
-        <Link href={user ? "/" : "http://localhost:3000/login"}>
-          <MenuItem
-            setActive={setActive}
-            active={active}
-            item={user ? user : "Login"}
-          ></MenuItem>
-        </Link>
+        {!isSignedIn ? (
+          <Link href="/sign-in">
+            <MenuItem
+              setActive={setActive}
+              active={active}
+              item={"Login"}
+            ></MenuItem>
+          </Link>
+        ) : (
+          <>
+            <MenuItem
+              setActive={setActive}
+              active={active}
+              item={user?.username || ""}
+            ></MenuItem>
+          </>
+        )}
 
         {/* For Github Repo */}
         <Link href="https://github.com/rupeshshandilya/Nexus">
@@ -51,14 +41,6 @@ export function Navbar({ className }: { className?: string }) {
             item="Github"
           ></MenuItem>
         </Link>
-
-        {user && (
-          <MenuItem
-          setActive={setActive}
-          active={active}
-          item="Logout"
-          onClick={handleLogout}></MenuItem>
-        )}
       </Menu>
     </div>
   );

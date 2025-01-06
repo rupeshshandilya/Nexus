@@ -24,7 +24,7 @@ export default function Home() {
       event.preventDefault();
       setTheme("system");
     }
-  }, []);
+  },[]);
 
   useEffect(() => {
     document.addEventListener("keydown", handlekeyDown);
@@ -33,7 +33,7 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handlekeyDown);
   }, [handlekeyDown]);
 
-  return isDesktop && width! > 1280 ? (
+  return isDesktop && width! > 1039 ? (
     <>
       <HeroSection />
     </>
