@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     // Check if data is unique or not
     const isDataUnique = await prisma.resources.findUnique({
       where: {
-        title,
+        title: title,
       },
     });
 
