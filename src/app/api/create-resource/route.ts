@@ -16,9 +16,12 @@ export async function POST(req: Request) {
     // Field Length Need to set
 
     // Check if data is unique or not
-    const isDataUnique = await prisma.resources.findUnique({
+    const isDataUnique = await prisma.resources.findFirst({
       where: {
-        title: title,
+        title: {
+          equals: title,
+          mode: 'insensitive'
+        }
       },
     });
 
