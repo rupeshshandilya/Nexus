@@ -1,13 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import { Menu, MenuItem } from "../components/ui/navbar-menu";
-import { cn } from "@/lib/utils";
+import { cn } from "@/libs/utils";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 export function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
-  const { user,isSignedIn } = useUser();
+  const { isSignedIn } = useUser();
 
   return (
     <div
@@ -25,11 +25,7 @@ export function Navbar({ className }: { className?: string }) {
           </Link>
         ) : (
           <>
-            <MenuItem
-              setActive={setActive}
-              active={active}
-              item={user?.username || ""}
-            ></MenuItem>
+           <UserButton />
           </>
         )}
 
