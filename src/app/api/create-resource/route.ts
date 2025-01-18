@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Field Length Need to set
+    // TODO: Field Length Need to set
 
     // Check if data is unique or not
     const isDataUnique = await prisma.resources.findFirst({
