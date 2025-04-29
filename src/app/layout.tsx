@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
-import { Navbar } from "@/components/navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 
+// Import the fontsource packages
+import "@fontsource/bebas-neue";
+import "@fontsource/jetbrains-mono";
+
+// Load local fonts
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -16,9 +21,18 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+// Load Inter from Google Fonts
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Nexus",
-  description: "Place a developer can find all libraries",
+  title: "NEXUS | Developer Resources",
+  description:
+    "Your one-stop destination for discovering high-quality libraries, packages, and resources",
+  keywords: ["developer tools", "libraries", "packages", "resources", "nexus"],
 };
 
 export default function RootLayout({
@@ -28,13 +42,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider dynamic>
-      <html lang="en">
+      <html lang="en" className="dark">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
+          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-sans antialiased bg-black text-white`}
         >
-          <div className="relative w-full flex items-center justify-center">
-            <Navbar />
-          </div>
           <Providers>{children}</Providers>
         </body>
       </html>
