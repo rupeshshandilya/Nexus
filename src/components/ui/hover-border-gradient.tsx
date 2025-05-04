@@ -1,17 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
+
 import { motion } from "framer-motion";
 import { cn } from "@/libs/utils";
 
 type Direction = "TOP" | "LEFT" | "BOTTOM" | "RIGHT";
-
-type HoverBorderGradientProps = {
-  as?: React.ElementType;
-  containerClassName?: string;
-  className?: string;
-  duration?: number;
-  clockwise?: boolean;
-} & React.HTMLAttributes<HTMLElement>;
 
 export function HoverBorderGradient({
   children,
@@ -21,7 +14,15 @@ export function HoverBorderGradient({
   duration = 1,
   clockwise = true,
   ...props
-}: HoverBorderGradientProps) {
+}: React.PropsWithChildren<
+  {
+    as?: React.ElementType;
+    containerClassName?: string;
+    className?: string;
+    duration?: number;
+    clockwise?: boolean;
+  } & React.HTMLAttributes<HTMLElement>
+>) {
   const [hovered, setHovered] = useState<boolean>(false);
   const [direction, setDirection] = useState<Direction>("TOP");
 
@@ -53,19 +54,15 @@ export function HoverBorderGradient({
       }, duration * 1000);
       return () => clearInterval(interval);
     }
-  }, [hovered, duration, rotateDirection]);
-
-  // Create a properly typed version of Tag to handle the props
-  const Component = Tag as React.ElementType;
-
+  }, [hovered]);
   return (
-    <Component
+    <Tag
       onMouseEnter={() => {
         setHovered(true);
       }}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        "relative flex rounded-full border content-center bg-black/20 hover:bg-black/10 transition duration-500 dark:bg-white/20 items-center flex-col flex-nowrap gap-10 h-min justify-center overflow-visible p-px decoration-clone w-fit",
+        "relative flex rounded-full border  content-center bg-black/20 hover:bg-black/10 transition duration-500 dark:bg-white/20 items-center flex-col flex-nowrap gap-10 h-min justify-center overflow-visible p-px decoration-clone w-fit",
         containerClassName
       )}
       {...props}
@@ -94,9 +91,9 @@ export function HoverBorderGradient({
             ? [movingMap[direction], highlight]
             : movingMap[direction],
         }}
-        transition={{ ease: "linear", duration: duration }}
+        transition={{ ease: "linear", duration: duration ?? 1 }}
       />
       <div className="bg-black absolute z-1 flex-none inset-[2px] rounded-[100px]" />
-    </Component>
+    </Tag>
   );
 }

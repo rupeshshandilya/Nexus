@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { ButtonHTMLAttributes, HTMLAttributes } from "react";
 import { cn } from "@/libs/utils";
 
-interface HoverBorderGradientProps {
+interface HoverBorderGradientProps extends 
+  Omit<ButtonHTMLAttributes<HTMLButtonElement> & HTMLAttributes<HTMLDivElement>, 'className'> {
   containerClassName?: string;
   className?: string;
   borderClassName?: string;
@@ -12,7 +13,6 @@ interface HoverBorderGradientProps {
   target?: string;
   rel?: string;
   children: React.ReactNode;
-  [key: string]: any; // For additional props
 }
 
 export const HoverBorderGradient = ({
