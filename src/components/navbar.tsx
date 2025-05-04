@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { Menu, MenuItem } from "../components/ui/navbar-menu";
 import { cn } from "@/libs/utils";
 import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 
 export function Navbar({ className }: { className?: string }) {
-  const [active, setActive] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isSignedIn } = useUser();
 

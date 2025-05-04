@@ -2,14 +2,11 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Spotlight } from "./ui/Spotlight";
-import { HoverBorderGradient } from "./ui/hover-border-gradient";
 import {
-  ArrowRight,
   Search,
   Code,
   Package,
   Star,
-  Sparkles,
   Compass,
   Lightbulb,
 } from "lucide-react";
