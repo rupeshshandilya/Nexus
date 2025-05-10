@@ -60,7 +60,7 @@ const Sidebar = () => {
       {/* Footer Area */}
       <div className="mt-auto pt-6 border-t border-gray-800">
         <div className="flex items-center text-sm text-gray-500">
-          <span>© 2025 Resource Hub</span>
+          <span>© 2025 Nexus Resource Hub</span>
         </div>
       </div>
     </div>

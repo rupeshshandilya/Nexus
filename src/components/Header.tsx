@@ -10,10 +10,10 @@ const Header: React.FC = () => {
         </button>
       </div>
       <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight animate-reveal">
-        Welcome to the Den <span role="img" aria-label="lion" className="inline-block animate-pulse">🦁</span>
+        Welcome to Nexus <span role="img" aria-label="lion" className="inline-block animate-pulse">🦁</span>
       </h1>
       <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto">
-        DevelopersDen is an open source collection of quality resources for developers, designers & backend nerds.
+        Nexus is an open source collection of quality resources for developers, designers & backend nerds.
       </p>
     </div>
   );
