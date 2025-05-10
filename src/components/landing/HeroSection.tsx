@@ -2,14 +2,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Spotlight } from "./ui/Spotlight";
-import {
-  Search,
-  Code,
-  Package,
-  Star,
-  Compass,
-  Lightbulb,
-} from "lucide-react";
+import { Search, Code, Package, Star, Compass, Lightbulb } from "lucide-react";
 
 const HeroSection = () => {
   // Rotating phrases for the tagline
@@ -29,7 +22,7 @@ const HeroSection = () => {
       setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % phrases.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [phrases.length]);
 
   return (
     <div className="h-auto md:min-h-[95vh] w-full flex flex-col items-center justify-center relative overflow-hidden mx-auto py-24 bg-black">
