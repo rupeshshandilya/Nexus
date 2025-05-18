@@ -53,32 +53,44 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Log form data to console before submission
+    console.log('Form submitted with data:', formData);
+    
+    // Call the onSubmit prop with the form data
     onSubmit(formData);
+    
+    // Reset the form
     setFormData({
       title: '',
       description: '',
       imageUrl: '',
       link: ''
     });
+    
+    // Close the dialog
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-fadeIn">
       <div 
-        className="absolute inset-0" 
+        className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/90" 
         onClick={onClose}
         aria-hidden="true"
       ></div>
       
-      <div className="relative w-full max-w-lg mx-4 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl overflow-hidden animate-scaleIn">
-        <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center">
+      <div className="relative w-full max-w-lg mx-4 bg-gradient-to-b from-gray-900 to-black border border-gray-800/50 rounded-xl shadow-[0_0_25px_rgba(0,0,0,0.8)] overflow-hidden animate-scaleIn">
+        {/* Glow accent at the top */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600/20 via-indigo-600/80 to-indigo-600/20"></div>
+        
+        <div className="px-6 py-5 border-b border-gray-800/50 flex justify-between items-center bg-black/40 backdrop-blur-sm">
           <h3 className="text-xl font-bold text-white">Add New Resource</h3>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-indigo-400 transition-colors duration-300"
             aria-label="Close dialog"
           >
             <svg 
@@ -98,10 +110,10 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-gradient-to-b from-black/20 to-black/40">
           <div className="space-y-2">
             <label htmlFor="title" className="block text-sm font-medium text-gray-300">
-              Title <span className="text-red-500">*</span>
+              Title <span className="text-indigo-500">*</span>
             </label>
             <input
               type="text"
@@ -111,13 +123,13 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
               onChange={handleChange}
               required
               placeholder="e.g., Design System Resources"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500"
+              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
             />
           </div>
           
           <div className="space-y-2">
             <label htmlFor="description" className="block text-sm font-medium text-gray-300">
-              Description <span className="text-red-500">*</span>
+              Description <span className="text-indigo-500">*</span>
             </label>
             <textarea
               id="description"
@@ -127,13 +139,13 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
               required
               rows={3}
               placeholder="Brief description of the resource..."
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500"
+              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
             ></textarea>
           </div>
           
           <div className="space-y-2">
             <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-300">
-              Image URL <span className="text-red-500">*</span>
+              Image URL <span className="text-indigo-500">*</span>
             </label>
             <input
               type="url"
@@ -143,13 +155,13 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
               onChange={handleChange}
               required
               placeholder="e.g., https://example.com/image.jpg"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500"
+              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
             />
           </div>
           
           <div className="space-y-2">
             <label htmlFor="link" className="block text-sm font-medium text-gray-300">
-              Resource Link <span className="text-red-500">*</span>
+              Resource Link <span className="text-indigo-500">*</span>
             </label>
             <input
               type="url"
@@ -159,21 +171,21 @@ export default function ResourceFormDialog({ isOpen, onClose, onSubmit }: Resour
               onChange={handleChange}
               required
               placeholder="e.g., https://designsystemresources.com"
-              className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500"
+              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
             />
           </div>
           
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-700 rounded-lg hover:bg-gray-800 text-white font-medium transition-colors"
+              className="flex-1 px-4 py-3 bg-black/60 border border-gray-800 rounded-lg hover:bg-gray-900 text-white font-medium transition-colors duration-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition-colors shadow-md"
+              className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition-colors duration-300 shadow-lg shadow-indigo-900/50"
             >
               Add Resource
             </button>

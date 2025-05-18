@@ -120,22 +120,10 @@ export default function Explore() {
       {/* Main Content - with subtle inset shadow for depth */}
       <main className="flex-grow overflow-x-hidden bg-gradient-to-b from-gray-900/70 via-black to-gray-900/70 shadow-inner">
         {/* Header section */}
+        <div className='flex'>
         <Header />
-        
-        {/* Resources section */}
-        <div className="container mx-auto px-6 pb-20">
-          <div className="mb-10 mt-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-3xl sm:text-4xl font-bold relative">
-                All Resources 
-                <span className="text-gray-500 ml-2 text-2xl sm:text-3xl">({displayedResources.length})</span>
-                <div className="h-1 w-20 bg-gray-700 rounded-full mt-2"></div>
-              </h2>
-              
-              <div className="flex flex-wrap gap-2 sm:gap-4">
-                {/* Add Resource Button */}
-                <button 
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg px-4 py-2.5 text-white transition-colors font-medium shadow-md"
+        <button 
+                  className="flex items-center absolute right-2 top-2 gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
                   onClick={() => setIsResourceFormOpen(true)}
                 >
                   <svg 
@@ -154,6 +142,22 @@ export default function Explore() {
                   </svg>
                   <span>Add Resource</span>
                 </button>
+
+                </div>
+        
+        {/* Resources section */}
+        <div className="container mx-auto ml-3 px-6 pb-20">
+          <div className="mb-10 mt-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-3xl sm:text-4xl font-bold relative">
+                All Resources 
+                <span className="text-gray-500 ml-2 text-2xl sm:text-3xl">({displayedResources.length})</span>
+                <div className="h-1 w-20 bg-gray-700 rounded-full mt-2"></div>
+              </h2>
+              
+              <div className="flex flex-wrap gap-2 sm:gap-4">
+                {/* Add Resource Button */}
+                
                 
                 {/* Sort Dropdown */}
                 <div className="relative sort-dropdown">
