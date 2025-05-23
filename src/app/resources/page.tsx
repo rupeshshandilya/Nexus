@@ -1,9 +1,12 @@
-"use client";
-import Sidebar from "@/components/sidebar";
-import ResourceCard from "../../components/ResourceCard";
-import Header from "@/components/Header";
-import { Resource } from "../types/index";
-import React, { useState, useMemo, useEffect } from "react";
+
+"use client"
+import Sidebar from '@/components/sidebar'
+import ResourceCard from '../../components/ResourceCard';
+import Header from '@/components/Header';
+import ResourceFormDialog from '../../components/Rdialog';
+import { Resource } from '../types/index';
+import React, { useState, useMemo, useEffect } from 'react';
+
 
 const resourcesData: Resource[] = [
   {
@@ -39,10 +42,14 @@ type SortOption = "A-Z" | "Z-A" | "Newest" | "Oldest";
 type FilterOption = "None" | "UI" | "Tools" | "Resources" | "Accessibility";
 
 export default function Explore() {
-  const [sortBy, setSortBy] = useState<SortOption>("A-Z");
-  const [filterBy, setFilterBy] = useState<FilterOption>("None");
+
+  const [resources, setResources] = useState<Resource[]>(resourcesData);
+  const [sortBy, setSortBy] = useState<SortOption>('A-Z');
+  const [filterBy, setFilterBy] = useState<FilterOption>('None');
+
   const [isOpenSort, setIsOpenSort] = useState(false);
   const [isOpenFilter, setIsOpenFilter] = useState(false);
+  const [isResourceFormOpen, setIsResourceFormOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -65,9 +72,19 @@ export default function Explore() {
     };
   }, [isOpenSort, isOpenFilter]);
 
+  // Function to handle adding a new resource
+  const handleAddResource = (newResource: Omit<Resource, 'id'>) => {
+    const newId = (resources.length + 1).toString();
+    setResources([
+      ...resources,
+      { id: newId, ...newResource }
+    ]);
+  };
+
   // Sort and filter resources
   const displayedResources = useMemo(() => {
-    let filtered = [...resourcesData];
+
+    let filtered = [...resources];
 
     // Apply filtering
     if (filterBy !== "None") {
@@ -93,36 +110,72 @@ export default function Explore() {
           return 0;
       }
     });
-  }, [sortBy, filterBy]);
+
+  }, [sortBy, filterBy, resources]);
+
 
   // To prevent hydration mismatch
   if (!isMounted) return null;
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-      {/* Sidebar - fixed width on desktop, full width collapsed menu on mobile */}
-      <div className="md:w-72 flex-shrink-0 md:sticky md:top-0 md:h-screen border-r border-gray-800/30">
+
+      {/* Sidebar - with enhanced separation */}
+      <div className="md:w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen border-r border-gray-800 bg-black/50 shadow-lg shadow-gray-900/30">
         <Sidebar />
       </div>
+      
+      {/* Vertical Divider - adding a distinct separation between sidebar and content */}
+      <div className="hidden md:block w-1 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-700"></div>
+      
+      {/* Main Content - with subtle inset shadow for depth */}
+      <main className="flex-grow overflow-x-hidden bg-gradient-to-b from-gray-900/70 via-black to-gray-900/70 shadow-inner">
 
-      {/* Main Content - takes remaining width */}
-      <main className="flex-grow overflow-x-hidden">
         {/* Header section */}
+        <div className='flex'>
         <Header />
 
+        <button 
+                  className="flex items-center absolute right-2 top-2 gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
+                  onClick={() => setIsResourceFormOpen(true)}
+                >
+                  <svg 
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth="2" 
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    ></path>
+                  </svg>
+                  <span>Add Resource</span>
+                </button>
+
+                </div>
+        
+
         {/* Resources section */}
-        <div className="container mx-auto px-4 pb-20">
-          <div className="mb-10">
+        <div className="container mx-auto ml-3 px-6 pb-20">
+          <div className="mb-10 mt-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-3xl sm:text-4xl font-bold relative">
-                All Resources
-                <span className="text-gray-500 ml-2 text-2xl sm:text-3xl">
-                  ({resourcesData.length})
-                </span>
+
+                All Resources 
+                <span className="text-gray-500 ml-2 text-2xl sm:text-3xl">({displayedResources.length})</span>
+
+
                 <div className="h-1 w-20 bg-gray-700 rounded-full mt-2"></div>
               </h2>
 
               <div className="flex flex-wrap gap-2 sm:gap-4">
+                {/* Add Resource Button */}
+                
+                
                 {/* Sort Dropdown */}
                 <div className="relative sort-dropdown">
                   <button
@@ -245,6 +298,13 @@ export default function Explore() {
           )}
         </div>
       </main>
+      
+      {/* Resource Form Dialog */}
+      <ResourceFormDialog
+        isOpen={isResourceFormOpen}
+        onClose={() => setIsResourceFormOpen(false)}
+        onSubmit={handleAddResource}
+      />
     </div>
   );
 }
