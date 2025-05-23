@@ -3,16 +3,27 @@
 import React from "react";
 import { cn } from "@/libs/utils";
 
-interface HoverBorderGradientProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type BaseProps = {
   containerClassName?: string;
   className?: string;
   borderClassName?: string;
-  as?: "button" | "div";
-  href?: string;
-  target?: string;
-  rel?: string;
-}
+  children: React.ReactNode;
+};
+
+type ButtonProps = BaseProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    as?: "button";
+  };
+
+type DivProps = BaseProps &
+  React.HTMLAttributes<HTMLDivElement> & {
+    as: "div";
+    href?: string;
+    target?: string;
+    rel?: string;
+  };
+
+type HoverBorderGradientProps = ButtonProps | DivProps;
 
 export const HoverBorderGradient = ({
   containerClassName,
@@ -22,8 +33,6 @@ export const HoverBorderGradient = ({
   as = "button",
   ...props
 }: HoverBorderGradientProps) => {
-  const Container = as === "button" ? "button" : "div";
-
   return (
     <div
       className={cn(
@@ -37,15 +46,27 @@ export const HoverBorderGradient = ({
           borderClassName || "bg-gradient-to-r from-purple-600 to-blue-500"
         )}
       />
-      <Container
-        className={cn(
-          "relative z-10 rounded-[inherit] px-6 py-2.5 transition duration-300",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </Container>
+      {as === "button" ? (
+        <button
+          className={cn(
+            "relative z-10 rounded-[inherit] px-6 py-2.5 transition duration-300",
+            className
+          )}
+          {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+        >
+          {children}
+        </button>
+      ) : (
+        <div
+          className={cn(
+            "relative z-10 rounded-[inherit] px-6 py-2.5 transition duration-300",
+            className
+          )}
+          {...(props as React.HTMLAttributes<HTMLDivElement>)}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 };

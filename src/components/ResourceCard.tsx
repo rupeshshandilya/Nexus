@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Resource } from '../app/types';
+import Image from 'next/image';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -11,10 +12,12 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
   return (
     <div className="bg-gray-900 bg-opacity-40 backdrop-blur-sm rounded-xl overflow-hidden flex flex-col h-full border border-gray-800 transition-all duration-300 hover:border-gray-600 hover:shadow-[0_0_20px_rgba(75,75,75,0.15)] group">
       <div className="relative h-56 w-full overflow-hidden">
-        <img 
+        <Image
           src={resource.imageUrl} 
           alt={resource.title}
           className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+          width={600}
+          height={400}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90"></div>
       </div>
