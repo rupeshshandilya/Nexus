@@ -1,58 +1,121 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prismadb";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
-    const { title, description, userId, tag } = await req.json();
+    const { userId } = await auth();
 
-    // if any data not found
-    if (!title || !description || !userId || !tag) {
+    if (!userId) {
       return NextResponse.json({
-        status: 404,
-        message: "Please Fill All Details",
+        status: 401,
+        message: "Unauthorized - Please sign in to create a resource",
       });
     }
 
-    // TODO: Field Length Need to set
+    const { title, description, imageUrl, link, tag } = await req.json();
 
-    // Check if data is unique or not
-    const isDataUnique = await prisma.resources.findFirst({
+    // Validate required fields
+    if (!title || !description || !imageUrl || !link || !tag) {
+      return NextResponse.json({
+        status: 400,
+        message:
+          "Please provide all required fields: title, description, imageUrl, link, and tag",
+      });
+    }
+
+    // Validate tag
+    const validTags = ["UI", "Tools", "Resources", "Accessibility"];
+    if (!validTags.includes(tag)) {
+      return NextResponse.json({
+        status: 400,
+        message:
+          "Invalid tag. Must be one of: UI, Tools, Resources, Accessibility",
+      });
+    }
+
+    // Validate field lengths
+    if (title.length > 100) {
+      return NextResponse.json({
+        status: 400,
+        message: "Title must be less than 100 characters",
+      });
+    }
+
+    if (description.length > 500) {
+      return NextResponse.json({
+        status: 400,
+        message: "Description must be less than 500 characters",
+      });
+    }
+
+    // Validate URLs
+    try {
+      new URL(imageUrl);
+      new URL(link);
+    } catch {
+      return NextResponse.json({
+        status: 400,
+        message: "Please provide valid URLs for imageUrl and link",
+      });
+    }
+
+    // Check if resource with same title already exists
+    const existingResource = await prisma.resources.findFirst({
       where: {
         title: {
           equals: title,
-          mode: 'insensitive'
-        }
+          mode: "insensitive",
+        },
       },
     });
 
-    if (isDataUnique) {
+    if (existingResource) {
       return NextResponse.json({
         status: 409,
-        message: "Data with this title already exist!",
+        message: "A resource with this title already exists",
       });
     }
-    console.log("title: ", title);
 
-    // create resource in db
+    // Get or create user
+    let dbUser = await prisma.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          clerkUserId: userId,
+          userName: "User", // Default username, can be updated later
+        },
+      });
+    }
+
+    // Create resource in database
     const resource = await prisma.resources.create({
       data: {
-        title: title,
-        description: description,
-        userId: userId,
-        tag: tag,
+        title,
+        description,
+        imageUrl,
+        link,
+        userId: dbUser.id,
+        tag,
       },
     });
 
     return NextResponse.json({
-      status: 200,
-      resource: resource,
-      message: "Resource Created",
+      status: 201,
+      resource,
+      message: "Resource created successfully",
     });
   } catch (error) {
+    console.error("Error creating resource:", error);
     return NextResponse.json({
       status: 500,
-      message: "Something went wrong",
-      error: error
+      message: "Failed to create resource",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

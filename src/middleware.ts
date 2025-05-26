@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const publicRoutes = createRouteMatcher([
-  "/",                 // your home page
+  "/api/webhooks/clerk",                 // your home page
   "/sign-in(.*)",      // Clerk sign-in UI
   "/sign-up(.*)",      // Clerk sign-up UI
 ]);

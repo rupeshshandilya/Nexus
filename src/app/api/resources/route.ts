@@ -1,57 +1,67 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prismadb";
+import { Prisma } from "@prisma/client";
 
-export async function POST(req: Request) {
-  
+export async function GET(req: Request) {
   try {
-    const { title, description, tag,userId } = await req.json();
+    // Get query parameters
+    const { searchParams } = new URL(req.url);
+    const tag = searchParams.get("tag");
+    const sortBy = searchParams.get("sortBy") || "newest";
+    const search = searchParams.get("search");
 
-    // if any data not found
-    if (!title || !description || !tag) {
-      return NextResponse.json({
-        status: 404,
-        message: "Please Fill All Details",
-      });
+    // Build the where clause
+    const where: Prisma.ResourcesWhereInput = {};
+    if (tag && tag !== "all") {
+      where.tag = tag;
+    }
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
     }
 
-    // Check if data is unique or not
-    const isDataUnique = await prisma.resources.findFirst({
-      where: {
-        title: {
-          equals: title,
-          mode: "insensitive",
+    // Build the orderBy clause
+    const orderBy: Prisma.ResourcesOrderByWithRelationInput = {};
+    switch (sortBy) {
+      case "oldest":
+        orderBy.id = "asc";
+        break;
+      case "title-asc":
+        orderBy.title = "asc";
+        break;
+      case "title-desc":
+        orderBy.title = "desc";
+        break;
+      default: // 'newest'
+        orderBy.id = "desc";
+    }
+
+    // Fetch resources with user information
+    const resources = await prisma.resources.findMany({
+      where,
+      orderBy,
+      include: {
+        user: {
+          select: {
+            userName: true,
+          },
         },
-      },
-    });
-
-    if (isDataUnique) {
-      return NextResponse.json({
-        status: 409,
-        message: "Data with this title already exist!",
-      });
-    }
-
-    // create resource in db
-    const resource = await prisma.resources.create({
-      data: {
-        title: title,
-        description: description,
-        userId: userId,
-        tag: tag,
       },
     });
 
     return NextResponse.json({
       status: 200,
-      resource: resource,
-      message: "Resource Created",
+      resources,
+      message: "Resources fetched successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching resources:", error);
     return NextResponse.json({
       status: 500,
-      message: "Something went wrong",
-      error: error,
+      message: "Failed to fetch resources",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

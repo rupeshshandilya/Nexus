@@ -1,7 +1,12 @@
 export interface Resource {
-    id: string;
-    title: string;
-    description: string;
-    imageUrl: string;
-    link: string;
-  }
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  link: string;
+  userId: string;
+  tag: string;
+  user?: {
+    userName: string;
+  };
+}

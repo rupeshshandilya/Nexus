@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ResourcesProvider } from "@/context/ResourcesContext";
 
 // Import the fontsource packages
 import "@fontsource/bebas-neue";
@@ -46,7 +47,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-sans antialiased bg-black text-white`}
         >
-          <Providers>{children}</Providers>
+          <ResourcesProvider>
+            <Providers>{children}</Providers>
+          </ResourcesProvider>
         </body>
       </html>
     </ClerkProvider>
