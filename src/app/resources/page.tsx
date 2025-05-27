@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import { useResources } from "@/context/ResourcesContext";
 import { useAuth } from "@clerk/nextjs";
 import type { FilterOption } from "@/context/ResourcesContext";
+import { resourceTags } from "@/constants/resourceTags";
 
 export default function Explore() {
   const { isSignedIn } = useAuth();
@@ -187,15 +188,7 @@ export default function Explore() {
 
                   {isOpenFilter && (
                     <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-lg z-10 border border-gray-800 overflow-hidden animate-fadeIn">
-                      {(
-                        [
-                          "None",
-                          "UI",
-                          "Tools",
-                          "Resources",
-                          "Accessibility",
-                        ] as const
-                      ).map((option) => (
+                      {["None", ...resourceTags].map((option) => (
                         <button
                           key={option}
                           className="block w-full text-left px-4 py-2.5 hover:bg-black/50 transition-colors"
