@@ -39,17 +39,4 @@ export const categories: CategoryItem[] = [
   { name: 'Data Visualisation', icon: FiFileText },
   { name: 'Database', icon: FiFileText },
   { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  { name: 'CSS', icon: FiFileText },
-  // Add more categories as needed
 ];

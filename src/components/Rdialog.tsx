@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Resource } from "../app/types/index";
+import { resourceTags } from "@/constants/resourceTags";
 
 interface ResourceFormDialogProps {
   isOpen: boolean;
@@ -239,10 +240,11 @@ export default function ResourceFormDialog({
               required
               className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
             >
-              <option value="UI">UI</option>
-              <option value="Tools">Tools</option>
-              <option value="Resources">Resources</option>
-              <option value="Accessibility">Accessibility</option>
+              {resourceTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
             </select>
           </div>
 

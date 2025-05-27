@@ -8,9 +8,10 @@ import React, {
 } from "react";
 import axios from "axios";
 import { Resource } from "../app/types";
+import { ResourceTag } from "@/constants/resourceTags";
 
 type SortOption = "A-Z" | "Z-A" | "Newest" | "Oldest";
-type FilterOption = "None" | "UI" | "Tools" | "Resources" | "Accessibility";
+export type FilterOption = "None" | ResourceTag;
 
 interface ResourcesContextType {
   resources: Resource[];

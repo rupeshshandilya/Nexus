@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/libs/prismadb";
 import { auth } from "@clerk/nextjs/server";
+import { resourceTags } from "@/constants/resourceTags";
 
 export async function POST(req: Request) {
   try {
@@ -25,13 +26,14 @@ export async function POST(req: Request) {
     }
 
     // Validate tag
-    const validTags = ["UI", "Tools", "Resources", "Accessibility"];
-    if (!validTags.includes(tag)) {
-      return NextResponse.json({
-        status: 400,
-        message:
-          "Invalid tag. Must be one of: UI, Tools, Resources, Accessibility",
-      });
+    if (!resourceTags.includes(tag)) {
+      return NextResponse.json(
+        {
+          status: 400,
+          message: `Invalid tag. Must be one of: ${resourceTags.join(", ")}`,
+        },
+        { status: 400 }
+      );
     }
 
     // Validate field lengths

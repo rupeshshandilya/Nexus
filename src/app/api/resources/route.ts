@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     // Build the where clause
     const where: Prisma.ResourcesWhereInput = {};
     if (tag && tag !== "all") {
-      where.tag = tag;
+      where.tag = { equals: tag, mode: "insensitive" };
     }
     if (search) {
       where.OR = [
