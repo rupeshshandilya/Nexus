@@ -1,23 +1,19 @@
 // components/Sidebar.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { IoSearch } from "react-icons/io5";
-import { categories } from "../categories";
 import { useResources } from "@/context/ResourcesContext";
 import type { FilterOption } from "@/context/ResourcesContext";
+import { resourceTags } from "@/constants/resourceTags";
 
 const Sidebar = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredCategories, setFilteredCategories] = useState(categories);
   const { setFilterBy, filterBy } = useResources();
 
-  // Filter categories based on search term
-  useEffect(() => {
-    const filtered = categories.filter((category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredCategories(filtered);
-  }, [searchTerm]);
+  // Filter tags based on search term
+  const filteredTags = resourceTags.filter((tag) =>
+    tag.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="h-screen bg-black text-gray-300 w-72 p-5 overflow-hidden flex flex-col shadow-lg">
@@ -66,21 +62,23 @@ const Sidebar = () => {
               All
             </span>
           </li>
-          {filteredCategories.map((category, index) => (
+          {filteredTags.map((tag) => (
             <li
-              key={index}
+              key={tag}
               className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 group ${
-                filterBy === category.name
+                filterBy === tag
                   ? "bg-purple-700 text-white"
                   : "hover:bg-gray-800"
               }`}
-              onClick={() => setFilterBy(category.name as FilterOption)}
+              onClick={() => setFilterBy(tag as FilterOption)}
             >
               <div className="rounded-full bg-gray-800 p-2 mr-4 group-hover:bg-purple-700 transition-colors">
-                <category.icon className="w-5 h-5 text-gray-300 group-hover:text-white" />
+                <span className="w-5 h-5 text-gray-300 group-hover:text-white font-bold">
+                  {tag[0]}
+                </span>
               </div>
               <span className="text-base font-medium group-hover:text-white">
-                {category.name}
+                {tag}
               </span>
             </li>
           ))}

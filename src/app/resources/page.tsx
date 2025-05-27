@@ -7,6 +7,7 @@ import { Resource } from "../types/index";
 import React, { useState, useEffect } from "react";
 import { useResources } from "@/context/ResourcesContext";
 import { useAuth } from "@clerk/nextjs";
+import type { FilterOption } from "@/context/ResourcesContext";
 
 export default function Explore() {
   const { isSignedIn } = useAuth();
@@ -199,7 +200,7 @@ export default function Explore() {
                           key={option}
                           className="block w-full text-left px-4 py-2.5 hover:bg-black/50 transition-colors"
                           onClick={() => {
-                            setFilterBy(option);
+                            setFilterBy(option as FilterOption);
                             setIsOpenFilter(false);
                           }}
                         >

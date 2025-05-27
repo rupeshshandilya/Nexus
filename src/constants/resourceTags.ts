@@ -5,8 +5,6 @@ export const resourceTags = [
   "API",
   "Authentication",
   "Backgrounds",
-  "Boilerplate",
-  "Books",
   "Browser Extensions",
   "Cheatsheets",
   "CMS",
