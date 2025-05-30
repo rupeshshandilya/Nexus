@@ -3,6 +3,7 @@
 import React from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Theme } from "@radix-ui/themes";
+import { Toaster } from "@/components/ui/toaster";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -13,6 +14,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       disableTransitionOnChange
     >
       <Theme className="h-screen">{children}</Theme>
+      <Toaster />
     </ThemeProvider>
   );
 };

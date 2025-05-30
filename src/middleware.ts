@@ -4,6 +4,9 @@ const publicRoutes = createRouteMatcher([
   "/api/webhooks/clerk",                 // your home page
   "/sign-in(.*)",      // Clerk sign-in UI
   "/sign-up(.*)",      // Clerk sign-up UI
+  "/resources",
+  "/",
+  "/api/resources",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

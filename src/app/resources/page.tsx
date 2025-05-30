@@ -9,9 +9,13 @@ import { useResources } from "@/context/ResourcesContext";
 import { useAuth } from "@clerk/nextjs";
 import type { FilterOption } from "@/context/ResourcesContext";
 import { resourceTags } from "@/constants/resourceTags";
+import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 
 export default function Explore() {
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
   const {
     resources,
     isLoading,
@@ -79,28 +83,47 @@ export default function Explore() {
         <div className="flex">
           <Header />
 
-          {isSignedIn && (
-            <button
-              className="flex items-center absolute right-2 top-2 gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
-              onClick={() => setIsResourceFormOpen(true)}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+          <div className="absolute right-2 top-2 flex items-center gap-2">
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="/my-resources"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
+                >
+                  <span>My Resources</span>
+                </Link>
+
+                <button
+                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
+                  onClick={() => setIsResourceFormOpen(true)}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    ></path>
+                  </svg>
+                  <span>Add Resource</span>
+                </button>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <Link
+                href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                ></path>
-              </svg>
-              <span>Add Resource</span>
-            </button>
-          )}
+                <span>Sign In</span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Resources section */}
