@@ -331,16 +331,19 @@ export default function Explore() {
 
       {/* Desktop Layout (lg and up) */}
       <div className="hidden lg:flex min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-        {/* Desktop Sidebar */}
-        <div className="w-64 h-screen bg-black/50 border-r border-gray-800 shadow-lg shadow-gray-900/30 flex-shrink-0">
+        {/* Desktop Sidebar - Fixed positioning */}
+        <div className="desktop-sidebar-container bg-black/50 border-r border-gray-800 shadow-lg shadow-gray-900/30">
           <Sidebar />
         </div>
+
+        {/* Spacer for fixed sidebar */}
+        <div className="w-64 flex-shrink-0"></div>
 
         {/* Vertical Divider */}
         <div className="w-1 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-700"></div>
 
         {/* Desktop Main Content */}
-        <main className="flex-grow overflow-x-hidden bg-gradient-to-b from-gray-900/70 via-black to-gray-900/70 shadow-inner min-h-screen">
+        <main className="flex-grow overflow-x-hidden bg-gradient-to-b from-gray-900/70 via-black to-gray-900/70 shadow-inner min-h-screen main-scrollable">
           {/* Desktop Header */}
           <Header />
 

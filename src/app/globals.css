@@ -215,3 +215,82 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-700;
 }
+
+/* Sidebar specific scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}
+
+/* For Firefox */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 transparent;
+}
+
+/* Smooth scrolling behavior */
+.sidebar-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Fixed sidebar specific styles */
+.fixed-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 10;
+}
+
+/* Ensure main content has proper margin when sidebar is fixed */
+.main-content-with-sidebar {
+  margin-left: 256px; /* 64 * 4 = 256px (w-64 in Tailwind) */
+}
+
+/* Hide scrollbar on mobile for cleaner sidebar appearance */
+@media (max-width: 1023px) {
+  .sidebar-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .sidebar-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Responsive sidebar improvements */
+@media (min-width: 1024px) {
+  .desktop-sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 256px;
+    z-index: 10;
+  }
+}
+
+/* Better scroll behavior for main content */
+.main-scrollable {
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Performance optimizations for fixed positioning */
+.fixed-sidebar,
+.desktop-sidebar-container {
+  transform: translateZ(0);
+  will-change: transform;
+}
