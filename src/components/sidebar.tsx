@@ -5,6 +5,7 @@ import { IoSearch } from "react-icons/io5";
 import { useResources } from "@/context/ResourcesContext";
 import type { FilterOption } from "@/context/ResourcesContext";
 import { resourceTags } from "@/constants/resourceTags";
+import Image from "next/image";
 
 const Sidebar = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,10 +19,17 @@ const Sidebar = () => {
   return (
     <div className="h-full bg-black text-gray-300 w-full flex flex-col shadow-lg overflow-hidden relative">
       {/* Logo or Brand Area */}
-      <div className="flex-shrink-0 p-4 md:p-5 mb-4 md:mb-6 border-b border-gray-800/50">
-        <h1 className="text-lg md:text-xl font-bold text-white">
+      <div className="flex-shrink-0 p-4 md:p-5 mb-4 md:mb-6 border-b border-gray-800/50 flex justify-center items-center">
+        {/* <h1 className="text-lg md:text-xl font-bold text-white">
           Resource Hub
-        </h1>
+        </h1> */}
+        <Image
+          src="/logo/logo.png"
+          width={100}
+          height={100}
+          alt="logo"
+          className="mx-auto"
+        />
       </div>
 
       {/* Search Input */}
