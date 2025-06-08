@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Resource } from "../app/types/index";
 import { resourceTags } from "@/constants/resourceTags";
+import ImageUpload from "./ImageUpload";
 
 interface ResourceFormDialogProps {
   isOpen: boolean;
@@ -77,6 +78,13 @@ export default function ResourceFormDialog({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      imageUrl,
     }));
   };
 
@@ -188,22 +196,18 @@ export default function ResourceFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="imageUrl"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Image URL <span className="text-indigo-500">*</span>
+            <label className="block text-sm font-medium text-gray-300">
+              Resource Image <span className="text-indigo-500">*</span>
             </label>
-            <input
-              type="url"
-              id="imageUrl"
-              name="imageUrl"
+            <ImageUpload
               value={formData.imageUrl}
-              onChange={handleChange}
-              required
-              placeholder="e.g., https://example.com/image.jpg"
-              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
+              onChange={handleImageUpload}
             />
+            {!formData.imageUrl && (
+              <p className="text-xs text-gray-500 mt-1">
+                Upload an image to represent your resource
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -260,7 +264,7 @@ export default function ResourceFormDialog({
             <button
               type="submit"
               className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition-colors duration-300 shadow-lg shadow-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.imageUrl}
             >
               {isSubmitting ? "Adding..." : "Add Resource"}
             </button>
