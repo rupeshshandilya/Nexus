@@ -17,7 +17,7 @@ declare global {
   };
 }
 
-const uploadPreset = "NexusUpload";
+const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
 interface ImageUploadProps {
   onChange: (value: string) => void;
