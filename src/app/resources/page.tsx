@@ -69,40 +69,45 @@ export default function Explore() {
   if (!isMounted) return null;
 
   return (
-    <>
-      {/* Mobile Layout (sm and below) */}
-      <div className="lg:hidden min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-        {/* Mobile Overlay */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        {/* Mobile Sidebar */}
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
         <div
-          className={`
-          transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          fixed top-0 left-0 z-50
-          w-64 h-full
-          bg-black
-          ${isSidebarOpen ? "border-r border-gray-800" : ""}
-          shadow-lg shadow-gray-900/30
-          ${!isSidebarOpen ? "invisible" : "visible"}
-        `}
-          style={{
-            marginLeft: isSidebarOpen ? "0" : "-256px",
-          }}
-        >
-          <Sidebar />
-        </div>
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-        {/* Mobile Content */}
-        <div className="min-h-screen">
-          {/* Mobile Header with Hamburger */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-black/90">
+      <div
+        className={`
+          transform transition-transform duration-300 ease-in-out lg:transform-none
+          ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+          fixed top-0 left-0 z-50 lg:z-auto
+          w-64 h-full
+          bg-black lg:bg-black/50
+          border-r border-gray-800
+          shadow-lg shadow-gray-900/30
+        `}
+      >
+        <Sidebar />
+      </div>
+
+      {/* Main Content Container */}
+      <div className="lg:flex min-h-screen">
+        {/* Spacer for desktop sidebar */}
+        <div className="hidden lg:block w-64 flex-shrink-0"></div>
+
+        {/* Vertical Divider - Desktop only */}
+        <div className="hidden lg:block w-1 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-700"></div>
+
+        {/* Main Content */}
+        <main className="flex-grow overflow-x-hidden lg:bg-gradient-to-b lg:from-gray-900/70 lg:via-black lg:to-gray-900/70 lg:shadow-inner min-h-screen">
+          {/* Mobile Header */}
+          <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-800 bg-black/90">
             <button
               onClick={() => setIsSidebarOpen(true)}
               className="text-white hover:text-gray-300 transition-colors p-1"
@@ -122,25 +127,30 @@ export default function Explore() {
                 ></path>
               </svg>
             </button>
-            <h1 className="text-lg md:text-xl font-bold">Resources</h1>
+            <h1 className="text-lg font-bold">Resources</h1>
             <div className="w-8"></div>
           </div>
 
-          {/* Mobile/Tablet Action Buttons */}
-          <div className="p-4">
+          {/* Desktop Header */}
+          <div className="hidden lg:block">
+            <Header />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="p-4 lg:absolute lg:right-2 lg:top-2 lg:p-0">
             <div className="flex flex-wrap items-center gap-2 justify-end">
               {isSignedIn ? (
                 <>
                   <Link
                     href="/my-resources"
-                    className="flex items-center gap-1 sm:gap-2 bg-blue-600 hover:bg-blue-700 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
+                    className="flex items-center gap-1 sm:gap-2 bg-blue-600 hover:bg-blue-700 rounded-xl lg:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
                   >
                     <span className="hidden sm:inline">My Resources</span>
                     <span className="sm:hidden">My Resources</span>
                   </Link>
 
                   <button
-                    className="flex items-center gap-1 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
+                    className="flex items-center gap-1 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl lg:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
                     onClick={() => setIsResourceFormOpen(true)}
                   >
                     <svg
@@ -148,7 +158,6 @@ export default function Explore() {
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         strokeLinecap="round"
@@ -167,7 +176,7 @@ export default function Explore() {
               ) : (
                 <Link
                   href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-xl lg:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
                 >
                   <span>Sign In</span>
                 </Link>
@@ -175,16 +184,17 @@ export default function Explore() {
             </div>
           </div>
 
-          {/* Mobile/Tablet Resources section */}
-          <div className="container mx-auto px-4 sm:px-6 pb-20">
-            <div className="mb-6 mt-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold relative">
-                  <span>Resources</span>
-                  <span className="text-gray-500 ml-2 text-lg sm:text-2xl md:text-3xl">
+          {/* Resources Section */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-6 lg:ml-3 pb-20">
+            <div className="mb-6 mt-4 lg:mb-10 lg:mt-6">
+              <div className="flex flex-col sm:flex-row lg:flex-row justify-between items-start sm:items-center lg:items-center gap-4">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold relative">
+                  <span className="lg:hidden">Resources</span>
+                  <span className="hidden lg:inline">All Resources</span>
+                  <span className="text-gray-500 ml-2 text-lg sm:text-2xl md:text-3xl lg:text-3xl">
                     ({resources.length})
                   </span>
-                  <div className="h-1 w-16 sm:w-20 bg-gray-700 rounded-full mt-2"></div>
+                  <div className="h-1.5 w-24 sm:w-32 lg:bg-gray-600 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 lg:from-gray-600 lg:to-gray-600 rounded-full mt-3 shadow-lg"></div>
                 </h2>
 
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -202,7 +212,6 @@ export default function Explore() {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           strokeLinecap="round"
@@ -247,7 +256,6 @@ export default function Explore() {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           strokeLinecap="round"
@@ -304,7 +312,7 @@ export default function Explore() {
 
             {/* Resources Grid */}
             {!isLoading && !error && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 animate-fadeInUp">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 animate-fadeInUp">
                 {resources.map((resource) => (
                   <ResourceCard key={resource.id} resource={resource} />
                 ))}
@@ -325,219 +333,45 @@ export default function Explore() {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-      </div>
 
-      {/* Desktop Layout (lg and up) */}
-      <div className="hidden lg:flex min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-        {/* Desktop Sidebar - Fixed positioning */}
-        <div className="desktop-sidebar-container bg-black/50 border-r border-gray-800 shadow-lg shadow-gray-900/30">
-          <Sidebar />
-        </div>
-
-        {/* Spacer for fixed sidebar */}
-        <div className="w-64 flex-shrink-0"></div>
-
-        {/* Vertical Divider */}
-        <div className="w-1 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-700"></div>
-
-        {/* Desktop Main Content */}
-        <main className="flex-grow overflow-x-hidden bg-gradient-to-b from-gray-900/70 via-black to-gray-900/70 shadow-inner min-h-screen main-scrollable">
-          {/* Desktop Header */}
-          <Header />
-
-          {/* Desktop Action Buttons */}
-          <div className="absolute right-2 top-2">
-            <div className="flex items-center gap-2">
-              {isSignedIn ? (
-                <>
-                  <Link
-                    href="/my-resources"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
+            {/* Footer Buttons - Bottom Left */}
+            {!isLoading && !error && resources.length > 0 && (
+              <div className="flex gap-3 mt-8">
+                <a
+                  href="mailto:rupeshkshandilya@gmail.com"
+                  className="flex items-center gap-2 bg-gray-800/90 backdrop-blur-sm hover:bg-gray-700 rounded-lg px-3 py-2 text-white transition-colors font-medium shadow-lg text-sm border border-gray-700"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <span>My Resources</span>
-                  </Link>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  <span>Contact</span>
+                </a>
 
-                  <button
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
-                    onClick={() => setIsResourceFormOpen(true)}
+                <a
+                  href="https://github.com/rupeshshandilya/Nexus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-gray-800/90 backdrop-blur-sm hover:bg-gray-700 rounded-lg px-3 py-2 text-white transition-colors font-medium shadow-lg text-sm border border-gray-700"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      ></path>
-                    </svg>
-                    <span>Add Resource</span>
-                  </button>
-                  <UserButton afterSignOutUrl="/" />
-                </>
-              ) : (
-                <Link
-                  href={`/sign-in?redirect_url=${encodeURIComponent(pathname)}`}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 rounded-2xl px-4 py-2.5 text-white transition-colors font-medium shadow-md"
-                >
-                  <span>Sign In</span>
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Desktop Resources section */}
-          <div className="container mx-auto px-6 ml-3 pb-20">
-            <div className="mb-10 mt-6">
-              <div className="flex justify-between items-center gap-4">
-                <h2 className="text-4xl font-bold relative">
-                  <span>All Resources</span>
-                  <span className="text-gray-500 ml-2 text-3xl">
-                    ({resources.length})
-                  </span>
-                  <div className="h-1 w-20 bg-gray-700 rounded-full mt-2"></div>
-                </h2>
-
-                <div className="flex gap-2">
-                  {/* Sort Dropdown */}
-                  <div className="relative sort-dropdown">
-                    <button
-                      className="flex items-center justify-between gap-2 border border-gray-800 rounded-lg px-4 py-2.5 text-white hover:bg-gray-900 transition-colors"
-                      onClick={() => setIsOpenSort(!isOpenSort)}
-                    >
-                      <span className="truncate">Sort: {sortBy}</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-300 flex-shrink-0 ${
-                          isOpenSort ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </button>
-
-                    {isOpenSort && (
-                      <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-lg z-10 border border-gray-800 overflow-hidden animate-fadeIn">
-                        {(["A-Z", "Z-A", "Newest", "Oldest"] as const).map(
-                          (option) => (
-                            <button
-                              key={option}
-                              className="block w-full text-left px-4 py-2.5 hover:bg-black/50 transition-colors"
-                              onClick={() => {
-                                setSortBy(option);
-                                setIsOpenSort(false);
-                              }}
-                            >
-                              {option}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Filter Dropdown */}
-                  <div className="relative filter-dropdown">
-                    <button
-                      className="flex items-center justify-between gap-2 border border-gray-800 rounded-lg px-4 py-2.5 text-white hover:bg-gray-900 transition-colors"
-                      onClick={() => setIsOpenFilter(!isOpenFilter)}
-                    >
-                      <span className="truncate">Filter: {filterBy}</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-300 flex-shrink-0 ${
-                          isOpenFilter ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </button>
-
-                    {isOpenFilter && (
-                      <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-lg z-10 border border-gray-800 overflow-hidden animate-fadeIn">
-                        {["None", ...resourceTags].map((option) => (
-                          <button
-                            key={option}
-                            className="block w-full text-left px-4 py-2.5 hover:bg-black/50 transition-colors"
-                            onClick={() => {
-                              setFilterBy(option as FilterOption);
-                              setIsOpenFilter(false);
-                            }}
-                          >
-                            {option}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Loading state */}
-            {isLoading && (
-              <div className="text-center py-16">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-indigo-600"></div>
-                <p className="mt-4 text-gray-400">Loading resources...</p>
-              </div>
-            )}
-
-            {/* Error state */}
-            {error && (
-              <div className="text-center py-16">
-                <p className="text-red-400">{error}</p>
-                <button
-                  onClick={fetchResources}
-                  className="mt-4 px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Try Again
-                </button>
-              </div>
-            )}
-
-            {/* Resources Grid */}
-            {!isLoading && !error && (
-              <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 animate-fadeInUp">
-                {resources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
-              </div>
-            )}
-
-            {/* No results message */}
-            {!isLoading && !error && resources.length === 0 && (
-              <div className="text-center py-16">
-                <p className="text-xl text-gray-400">
-                  No resources found matching your filter criteria.
-                </p>
-                <button
-                  className="mt-4 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
-                  onClick={() => setFilterBy("None")}
-                >
-                  Clear filter
-                </button>
+                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 10.956.69-.069-.069-.069-.069-.069-.069 0-.483-.07-.483-.07-.276-.138-.345-.276-.345-.552 0-.276.069-.621.138-.966.069-.345.138-.69.138-1.035 0-.69-.345-1.311-.828-1.656 2.553-.276 5.244-1.242 5.244-5.658 0-1.311-.483-2.346-1.242-3.107.138-.345.552-1.518-.138-3.107 0 0-1.035-.345-3.384 1.242-1.035-.276-2.139-.414-3.245-.414-1.104 0-2.209.138-3.245.414C4.495 7.521 3.46 7.866 3.46 7.866c-.69 1.59-.276 2.762-.138 3.107-.759.76-1.242 1.796-1.242 3.107 0 4.416 2.691 5.382 5.244 5.658-.345.276-.621.828-.621 1.656 0 1.173.069 2.346.069 2.691 0 .276-.207.552-.69.414C3.187 21.404.029 17.066.029 11.987.029 5.367 5.396.001 12.017.001z" />
+                  </svg>
+                  <span>Contribute</span>
+                </a>
               </div>
             )}
           </div>
@@ -552,6 +386,6 @@ export default function Explore() {
           onSubmit={handleAddResource}
         />
       )}
-    </>
+    </div>
   );
 }
