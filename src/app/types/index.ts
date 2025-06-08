@@ -5,7 +5,9 @@ export interface Resource {
   imageUrl: string;
   link: string;
   userId: string;
-  tag: string;
+  tag: string[];
+  createdAt?: string;
+  updatedAt?: string;
   user?: {
     userName: string;
   };

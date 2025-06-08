@@ -54,6 +54,7 @@ export default function MyResourcesPage() {
   const [isResourceFormOpen, setIsResourceFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,16 +83,41 @@ export default function MyResourcesPage() {
   }, [isSignedIn]);
 
   const filteredResources = resources.filter((resource) => {
+    const tagText = Array.isArray(resource.tag)
+      ? resource.tag.join(" ")
+      : String(resource.tag);
+
     const matchesSearch =
       resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      resource.tag.toLowerCase().includes(searchTerm.toLowerCase());
+      tagText.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
   const handleEditResource = (resource: Resource) => {
-    setEditingResource({ ...resource });
+    // Ensure tag is always an array for editing
+    const resourceToEdit = {
+      ...resource,
+      tag: Array.isArray(resource.tag) ? resource.tag : [resource.tag],
+    };
+    setEditingResource(resourceToEdit);
     setIsEditDialogOpen(true);
+  };
+
+  const handleTagToggle = (tagValue: string) => {
+    if (!editingResource) return;
+
+    const currentTags = Array.isArray(editingResource.tag)
+      ? editingResource.tag
+      : [editingResource.tag];
+    const newTags = currentTags.includes(tagValue)
+      ? currentTags.filter((t) => t !== tagValue)
+      : [...currentTags, tagValue];
+
+    setEditingResource({
+      ...editingResource,
+      tag: newTags,
+    });
   };
 
   const handleSaveResource = async () => {
@@ -341,9 +367,21 @@ export default function MyResourcesPage() {
                       {resource.description}
                     </CardDescription>
                     <div className="flex flex-wrap gap-1 mb-3">
-                      <Badge variant="outline" className="text-xs">
-                        {resource.tag}
-                      </Badge>
+                      {Array.isArray(resource.tag) ? (
+                        resource.tag.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="outline" className="text-xs">
+                          {resource.tag}
+                        </Badge>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter className="p-4 pt-0 flex gap-2">
@@ -468,27 +506,87 @@ export default function MyResourcesPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="tag">Tag</Label>
-                  <select
-                    id="tag"
-                    value={editingResource.tag}
-                    onChange={(e) =>
-                      setEditingResource({
-                        ...editingResource,
-                        tag: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border rounded-md bg-background text-foreground"
-                  >
-                    <option value="" disabled>
-                      Select a tag
-                    </option>
-                    {resourceTags.map((tag) => (
-                      <option key={tag} value={tag}>
-                        {tag}
-                      </option>
-                    ))}
-                  </select>
+                  <Label htmlFor="tag">Tags</Label>
+
+                  {/* Custom Multi-Select Dropdown */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsTagDropdownOpen(!isTagDropdownOpen)}
+                      className="w-full px-3 py-2 border rounded-md bg-background text-foreground flex justify-between items-center"
+                    >
+                      <span className="text-left flex-1">
+                        {editingResource.tag.length > 0
+                          ? editingResource.tag.length === 1
+                            ? editingResource.tag[0]
+                            : `${editingResource.tag.length} tags selected`
+                          : "Select tags"}
+                      </span>
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          isTagDropdownOpen ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* Dropdown Options */}
+                    {isTagDropdownOpen && (
+                      <div className="absolute z-10 w-full bottom-full mb-1 bg-background border rounded-md shadow-xl max-h-48 overflow-y-auto">
+                        {resourceTags.map((tag) => (
+                          <label
+                            key={tag}
+                            className="flex items-center px-3 py-2 hover:bg-muted cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={editingResource.tag.includes(tag)}
+                              onChange={() => handleTagToggle(tag)}
+                              className="w-4 h-4 mr-3 rounded"
+                            />
+                            <span className="text-sm">{tag}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Tags Display */}
+                  {editingResource.tag.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {editingResource.tag.map((selectedTag) => (
+                        <span
+                          key={selectedTag}
+                          onClick={() => handleTagToggle(selectedTag)}
+                          className="inline-flex items-center px-2 py-1 text-xs bg-muted rounded-full cursor-pointer hover:bg-muted/80 transition-colors"
+                        >
+                          {selectedTag}
+                          <svg
+                            className="w-3 h-3 ml-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

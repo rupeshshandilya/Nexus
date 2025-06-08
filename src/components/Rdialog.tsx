@@ -22,11 +22,12 @@ export default function ResourceFormDialog({
     description: "",
     imageUrl: "",
     link: "",
-    tag: "UI", // Default tag
+    tag: ["UI"], // Array for multiple selection
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -36,9 +37,10 @@ export default function ResourceFormDialog({
         description: "",
         imageUrl: "",
         link: "",
-        tag: "UI",
+        tag: ["UI"],
       });
       setError(null);
+      setIsDropdownOpen(false);
     }
   }, [isOpen]);
 
@@ -68,6 +70,15 @@ export default function ResourceFormDialog({
       document.body.style.overflow = "auto";
     };
   }, [isOpen]);
+
+  const handleTagToggle = (tagValue: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      tag: prev.tag.includes(tagValue)
+        ? prev.tag.filter((t) => t !== tagValue)
+        : [...prev.tag, tagValue],
+    }));
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -230,26 +241,89 @@ export default function ResourceFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="tag"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Category <span className="text-indigo-500">*</span>
+            <label className="block text-sm font-medium text-gray-300">
+              Categories <span className="text-indigo-500">*</span>
             </label>
-            <select
-              id="tag"
-              name="tag"
-              value={formData.tag}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
-            >
-              {resourceTags.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </select>
+
+            {/* Custom Multi-Select Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-all duration-300 shadow-inner flex justify-between items-center"
+              >
+                <span className="text-left flex-1">
+                  {formData.tag.length > 0
+                    ? formData.tag.length === 1
+                      ? formData.tag[0]
+                      : `${formData.tag.length} categories selected`
+                    : "Select categories"}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown Options */}
+              {isDropdownOpen && (
+                <div className="absolute z-10 w-full bottom-full mb-1 bg-gray-900 border border-gray-800 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                  {resourceTags.map((tag) => (
+                    <label
+                      key={tag}
+                      className="flex items-center px-4 py-2 hover:bg-gray-800 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.tag.includes(tag)}
+                        onChange={() => handleTagToggle(tag)}
+                        className="w-4 h-4 text-indigo-600 bg-black/70 border-gray-600 rounded focus:ring-indigo-500 focus:ring-1 mr-3"
+                      />
+                      <span className="text-sm text-gray-300">{tag}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selected Tags Display */}
+            {formData.tag.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.tag.map((selectedTag) => (
+                  <span
+                    key={selectedTag}
+                    onClick={() => handleTagToggle(selectedTag)}
+                    className="inline-flex items-center px-2 py-1 text-xs bg-indigo-600/20 text-indigo-400 rounded-full border border-indigo-600/30 cursor-pointer hover:bg-indigo-600/30 transition-colors"
+                  >
+                    {selectedTag}
+                    <svg
+                      className="w-3 h-3 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4 pt-4">
@@ -264,7 +338,9 @@ export default function ResourceFormDialog({
             <button
               type="submit"
               className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition-colors duration-300 shadow-lg shadow-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting || !formData.imageUrl}
+              disabled={
+                isSubmitting || !formData.imageUrl || formData.tag.length === 0
+              }
             >
               {isSubmitting ? "Adding..." : "Add Resource"}
             </button>

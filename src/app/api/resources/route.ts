@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     // Build the where clause
     const where: Prisma.ResourcesWhereInput = {};
     if (tag && tag !== "all") {
-      where.tag = { equals: tag, mode: "insensitive" };
+      where.tag = { has: tag };
     }
     if (search) {
       where.OR = [
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     const orderBy: Prisma.ResourcesOrderByWithRelationInput = {};
     switch (sortBy) {
       case "oldest":
-        orderBy.id = "asc";
+        orderBy.createdAt = "asc";
         break;
       case "title-asc":
         orderBy.title = "asc";
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         orderBy.title = "desc";
         break;
       default: // 'newest'
-        orderBy.id = "desc";
+        orderBy.createdAt = "desc";
     }
 
     // Fetch resources with user information
@@ -57,7 +57,6 @@ export async function GET(req: Request) {
       message: "Resources fetched successfully",
     });
   } catch (error) {
-    console.error("Error fetching resources:", error);
     return NextResponse.json({
       status: 500,
       message: "Failed to fetch resources",

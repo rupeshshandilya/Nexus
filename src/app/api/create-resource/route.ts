@@ -25,15 +25,35 @@ export async function POST(req: Request) {
       });
     }
 
-    // Validate tag
-    if (!resourceTags.includes(tag)) {
-      return NextResponse.json(
-        {
-          status: 400,
-          message: `Invalid tag. Must be one of: ${resourceTags.join(", ")}`,
-        },
-        { status: 400 }
-      );
+    // Handle multiple tags - convert string to array or use array directly
+    let tags: string[] = [];
+    if (typeof tag === "string") {
+      tags = tag
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+    } else if (Array.isArray(tag)) {
+      tags = tag.map((t) => t.trim()).filter((t) => t.length > 0);
+    } else {
+      return NextResponse.json({
+        status: 400,
+        message: "Tag must be a string or array of strings",
+      });
+    }
+
+    // Validate each tag
+    for (const singleTag of tags) {
+      if (!resourceTags.includes(singleTag as (typeof resourceTags)[number])) {
+        return NextResponse.json(
+          {
+            status: 400,
+            message: `Invalid tag "${singleTag}". Must be one of: ${resourceTags.join(
+              ", "
+            )}`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate field lengths
@@ -103,7 +123,7 @@ export async function POST(req: Request) {
         imageUrl,
         link,
         userId: dbUser.id,
-        tag,
+        tag: tags,
       },
     });
 

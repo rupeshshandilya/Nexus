@@ -50,7 +50,7 @@ export function ResourcesProvider({ children }: { children: React.ReactNode }) {
         Oldest: "oldest",
       };
 
-      const tag = filterBy === "None" ? "all" : filterBy.toLowerCase();
+      const tag = filterBy === "None" ? "all" : filterBy;
 
       const response = await axios.get("/api/resources", {
         params: {
@@ -75,7 +75,15 @@ export function ResourcesProvider({ children }: { children: React.ReactNode }) {
   const addResource = useCallback(
     async (newResource: Omit<Resource, "id" | "userId">) => {
       try {
-        const response = await axios.post("/api/create-resource", newResource);
+        // Convert tag array to comma-separated string for API compatibility
+        const resourceData = {
+          ...newResource,
+          tag: Array.isArray(newResource.tag)
+            ? newResource.tag.join(", ")
+            : newResource.tag,
+        };
+
+        const response = await axios.post("/api/create-resource", resourceData);
 
         if (response.data.status === 201) {
           const createdResource = response.data.resource;
@@ -87,8 +95,12 @@ export function ResourcesProvider({ children }: { children: React.ReactNode }) {
             > = {
               "A-Z": (a, b) => a.title.localeCompare(b.title),
               "Z-A": (a, b) => b.title.localeCompare(a.title),
-              Newest: (a, b) => b.id.localeCompare(a.id),
-              Oldest: (a, b) => a.id.localeCompare(b.id),
+              Newest: (a, b) =>
+                new Date(b.createdAt || "").getTime() -
+                new Date(a.createdAt || "").getTime(),
+              Oldest: (a, b) =>
+                new Date(a.createdAt || "").getTime() -
+                new Date(b.createdAt || "").getTime(),
             };
 
             // Add the new resource to the beginning of the array for immediate visibility
