@@ -1,4 +1,3 @@
-// components/ResourceCard.tsx
 import React from "react";
 import { Resource } from "../app/types";
 import Image from "next/image";
@@ -12,14 +11,13 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
   const { toast } = useToast();
 
   const handleCardClick = () => {
-    console.log("Card clicked, starting countdown...");
 
     let countdown = 5;
 
     // Show initial toast with countdown
     const { dismiss, update } = toast({
-      title: resource.title,
-      description: `Redirecting in ${countdown} seconds...`,
+      // title: resource.title,
+      description: `Redirecting to ${resource.title} in ${countdown} seconds...`,
       duration: 0, // Don't auto-dismiss, we'll control it manually
     });
 
@@ -30,8 +28,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
       if (countdown > 0) {
         // Update toast with new countdown
         update({
-          title: resource.title,
-          description: `Redirecting in ${countdown} seconds...`,
+          description: `Redirecting to ${resource.title} in ${countdown} seconds...`,
         });
       } else {
         // Countdown finished, redirect
@@ -52,7 +49,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
           // Show error toast if opening fails
           toast({
             title: "Error",
-            description: "Failed to open link. Please try again.",
+            description: `Failed to open ${resource.title}. Please try again. `,
             variant: "destructive",
             duration: 5000,
           });
