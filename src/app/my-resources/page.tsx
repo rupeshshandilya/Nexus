@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,51 +37,42 @@ import { Edit, Trash2, ExternalLink, Plus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
-import axios from "axios";
 import { Resource } from "../types";
 import Link from "next/link";
 import { resourceTags } from "@/constants/resourceTags";
 import { useRouter } from "next/navigation";
 import ResourceFormDialog from "../../components/Rdialog";
+import {
+  useUserResourcesQuery,
+  useCreateResourceMutation,
+  useUpdateResourceMutation,
+  useDeleteResourceMutation,
+} from "@/hooks/useResources";
 
 export default function MyResourcesPage() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
-  const [resources, setResources] = useState<Resource[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isResourceFormOpen, setIsResourceFormOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchUserResources = async () => {
-      if (!isSignedIn) return;
+  // Use React Query hooks
+  const {
+    data: resources = [],
+    isLoading,
+    error: queryError,
+  } = useUserResourcesQuery();
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await axios.get("/api/user-resources");
+  const createResourceMutation = useCreateResourceMutation();
+  const updateResourceMutation = useUpdateResourceMutation();
+  const deleteResourceMutation = useDeleteResourceMutation();
 
-        if (response.data.status === 200) {
-          setResources(response.data.resources);
-        } else {
-          setError("Failed to fetch resources");
-        }
-      } catch (err) {
-        setError("Error loading resources");
-        console.error("Error fetching resources:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const error = queryError?.message || null;
 
-    fetchUserResources();
-  }, [isSignedIn]);
-
+  // Filter resources based on search
   const filteredResources = resources.filter((resource) => {
     const tagText = Array.isArray(resource.tag)
       ? resource.tag.join(" ")
@@ -124,7 +115,7 @@ export default function MyResourcesPage() {
     if (!editingResource) return;
 
     try {
-      const response = await axios.patch("/api/user-resources", {
+      await updateResourceMutation.mutateAsync({
         id: editingResource.id,
         title: editingResource.title,
         description: editingResource.description,
@@ -133,29 +124,12 @@ export default function MyResourcesPage() {
         tag: editingResource.tag,
       });
 
-      if (response.data.status === 200) {
-        setResources((prev) =>
-          prev.map((resource) =>
-            resource.id === editingResource.id
-              ? { ...response.data.resource }
-              : resource
-          )
-        );
-        setIsEditDialogOpen(false);
-        setEditingResource(null);
-        toast({
-          title: "Resource updated",
-          description: "Your resource has been successfully updated.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            response.data.message ||
-            "Failed to update resource. Please try again.",
-          variant: "destructive",
-        });
-      }
+      setIsEditDialogOpen(false);
+      setEditingResource(null);
+      toast({
+        title: "Resource updated",
+        description: "Your resource has been successfully updated.",
+      });
     } catch {
       toast({
         title: "Error",
@@ -167,27 +141,12 @@ export default function MyResourcesPage() {
 
   const handleDeleteResource = async (resourceId: string) => {
     try {
-      const response = await axios.delete("/api/user-resources", {
-        data: { id: resourceId },
+      await deleteResourceMutation.mutateAsync(resourceId);
+      toast({
+        title: "Resource deleted",
+        description: "Your resource has been successfully deleted.",
+        variant: "destructive",
       });
-      if (response.data.status === 200) {
-        setResources((prev) =>
-          prev.filter((resource) => resource.id !== resourceId)
-        );
-        toast({
-          title: "Resource deleted",
-          description: "Your resource has been successfully deleted.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            response.data.message ||
-            "Failed to delete resource. Please try again.",
-          variant: "destructive",
-        });
-      }
     } catch {
       toast({
         title: "Error",
@@ -201,34 +160,22 @@ export default function MyResourcesPage() {
     newResource: Omit<Resource, "id" | "userId">
   ) => {
     try {
-      const response = await axios.post("/api/create-resource", newResource);
-
-      if (response.data.status === 201) {
-        const createdResource = response.data.resource;
-        setResources((prev) => [createdResource, ...prev]);
-        setIsResourceFormOpen(false);
-        toast({
-          title: "Resource created",
-          description: "Your resource has been successfully created.",
-        });
-        return { success: true };
-      } else {
-        toast({
-          title: "Error",
-          description:
-            response.data.message ||
-            "Failed to create resource. Please try again.",
-          variant: "destructive",
-        });
-        return { success: false, error: response.data.message };
-      }
-    } catch {
+      await createResourceMutation.mutateAsync(newResource);
+      setIsResourceFormOpen(false);
+      toast({
+        title: "Resource created",
+        description: "Your resource has been successfully created.",
+      });
+      return { success: true };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create resource";
       toast({
         title: "Error",
-        description: "Failed to create resource. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
-      return { success: false, error: "Failed to create resource" };
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -327,7 +274,7 @@ export default function MyResourcesPage() {
         {/* Resources Grid */}
         {!isLoading &&
           !error &&
-          (filteredResources.length === 0 ? (
+          (resources.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <div className="text-muted-foreground mb-4">

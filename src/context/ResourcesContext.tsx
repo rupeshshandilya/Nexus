@@ -1,14 +1,11 @@
 "use client";
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
-import axios from "axios";
+import React, { createContext, useContext, useState } from "react";
 import { Resource } from "../app/types";
 import { ResourceTag } from "@/constants/resourceTags";
+import {
+  useResourcesQuery,
+  useCreateResourceMutation,
+} from "@/hooks/useResources";
 
 type SortOption = "A-Z" | "Z-A" | "Newest" | "Oldest";
 export type FilterOption = "None" | ResourceTag;
@@ -32,108 +29,42 @@ const ResourcesContext = createContext<ResourcesContextType | undefined>(
 );
 
 export function ResourcesProvider({ children }: { children: React.ReactNode }) {
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const [filterBy, setFilterBy] = useState<FilterOption>("None");
 
-  const fetchResources = useCallback(async () => {
+  // Use React Query hook for fetching resources
+  const {
+    data: resources = [],
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useResourcesQuery(sortBy, filterBy);
+
+  // Use React Query mutation for creating resources
+  const createResourceMutation = useCreateResourceMutation();
+
+  const error = queryError?.message || null;
+
+  const addResource = async (
+    newResource: Omit<Resource, "id" | "userId">
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const sortMap: Record<SortOption, string> = {
-        "A-Z": "title-asc",
-        "Z-A": "title-desc",
-        Newest: "newest",
-        Oldest: "oldest",
-      };
-
-      const tag = filterBy === "None" ? "all" : filterBy;
-
-      const response = await axios.get("/api/resources", {
-        params: {
-          sortBy: sortMap[sortBy],
-          tag,
-        },
-      });
-
-      if (response.data.status === 200) {
-        setResources(response.data.resources);
-      } else {
-        setError("Failed to fetch resources");
-      }
+      await createResourceMutation.mutateAsync(newResource);
+      return { success: true };
     } catch (err) {
-      setError("Error loading resources");
-      console.error("Error fetching resources:", err);
-    } finally {
-      setIsLoading(false);
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      return { success: false, error: errorMessage };
     }
-  }, [sortBy, filterBy]);
+  };
 
-  const addResource = useCallback(
-    async (newResource: Omit<Resource, "id" | "userId">) => {
-      try {
-        // Convert tag array to comma-separated string for API compatibility
-        const resourceData = {
-          ...newResource,
-          tag: Array.isArray(newResource.tag)
-            ? newResource.tag.join(", ")
-            : newResource.tag,
-        };
-
-        const response = await axios.post("/api/create-resource", resourceData);
-
-        if (response.data.status === 201) {
-          const createdResource = response.data.resource;
-
-          setResources((prevResources) => {
-            const sortMap: Record<
-              SortOption,
-              (a: Resource, b: Resource) => number
-            > = {
-              "A-Z": (a, b) => a.title.localeCompare(b.title),
-              "Z-A": (a, b) => b.title.localeCompare(a.title),
-              Newest: (a, b) =>
-                new Date(b.createdAt || "").getTime() -
-                new Date(a.createdAt || "").getTime(),
-              Oldest: (a, b) =>
-                new Date(a.createdAt || "").getTime() -
-                new Date(b.createdAt || "").getTime(),
-            };
-
-            // Add the new resource to the beginning of the array for immediate visibility
-            const updatedResources = [createdResource, ...prevResources];
-            return updatedResources.sort(sortMap[sortBy]);
-          });
-
-          return { success: true };
-        } else {
-          return { success: false, error: response.data.message };
-        }
-      } catch (err) {
-        console.error("Error adding resource:", err);
-        if (axios.isAxiosError(err)) {
-          return {
-            success: false,
-            error: err.response?.data?.message || "Failed to create resource",
-          };
-        }
-        return { success: false, error: "An unexpected error occurred" };
-      }
-    },
-    [sortBy]
-  );
-
-  // Fetch resources when sort or filter changes
-  useEffect(() => {
-    fetchResources();
-  }, [fetchResources]);
+  const fetchResources = async () => {
+    await refetch();
+  };
 
   const value = {
     resources,
-    isLoading,
+    isLoading: isLoading || createResourceMutation.isPending,
     error,
     sortBy,
     filterBy,

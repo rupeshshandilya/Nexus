@@ -5,6 +5,8 @@ import "./globals.css";
 import Providers from "@/components/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ResourcesProvider } from "@/context/ResourcesContext";
+import QueryProvider from "@/providers/QueryProvider";
+import ToastProvider from "@/providers/ToastProvider";
 
 // Import the fontsource packages
 import "@fontsource/bebas-neue";
@@ -47,9 +49,13 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-sans antialiased bg-black text-white`}
         >
-          <ResourcesProvider>
-          <Providers>{children}</Providers>
-          </ResourcesProvider>
+          <QueryProvider>
+            <ResourcesProvider>
+              <ToastProvider>
+                <Providers>{children}</Providers>
+              </ToastProvider>
+            </ResourcesProvider>
+          </QueryProvider>
         </body>
       </html>
     </ClerkProvider>
