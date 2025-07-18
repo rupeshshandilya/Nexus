@@ -1,8 +1,93 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import type React from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { X, Upload, Link2, Tag, FileText, Type } from "lucide-react";
 import { Resource } from "../app/types/index";
 import { resourceTags } from "@/constants/resourceTags";
 import ImageUpload from "./ImageUpload";
+
+// SearchableDropdown component
+function SearchableDropdown({
+  categories,
+  selectedCategories,
+  onCategorySelect,
+}: {
+  categories: string[];
+  selectedCategories: string[];
+  onCategorySelect: (category: string) => void;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const filteredCategories = categories.filter(
+    (category) =>
+      category.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !selectedCategories.includes(category)
+  );
+
+  const handleSelect = (category: string) => {
+    onCategorySelect(category);
+    setSearchTerm("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Search and select categories..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 h-12 text-base pr-10"
+        />
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <Tag className="w-4 h-4 text-gray-400" />
+        </div>
+      </div>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute z-20 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            {filteredCategories.length > 0 ? (
+              filteredCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => handleSelect(category)}
+                  className="w-full px-4 py-3 text-left text-white hover:bg-gray-700 focus:bg-gray-700 focus:outline-none transition-colors first:rounded-t-lg last:rounded-b-lg"
+                >
+                  {category}
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-3 text-gray-400 text-center">
+                {searchTerm
+                  ? `No categories found for "${searchTerm}"`
+                  : "No more categories available"}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 interface ResourceFormDialogProps {
   isOpen: boolean;
@@ -22,12 +107,12 @@ export default function ResourceFormDialog({
     description: "",
     imageUrl: "",
     link: "",
-    tag: ["UI"], // Array for multiple selection
+    tag: [] as string[], // Array for multiple selection
   });
 
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -37,10 +122,10 @@ export default function ResourceFormDialog({
         description: "",
         imageUrl: "",
         link: "",
-        tag: ["UI"],
+        tag: [],
       });
+      setSelectedCategories([]);
       setError(null);
-      setIsDropdownOpen(false);
     }
   }, [isOpen]);
 
@@ -71,19 +156,30 @@ export default function ResourceFormDialog({
     };
   }, [isOpen]);
 
-  const handleTagToggle = (tagValue: string) => {
+  const handleCategorySelect = (category: string) => {
+    if (!selectedCategories.includes(category)) {
+      const newCategories = [...selectedCategories, category];
+      setSelectedCategories(newCategories);
+      setFormData((prev) => ({
+        ...prev,
+        tag: newCategories,
+      }));
+    }
+  };
+
+  const removeCategory = (categoryToRemove: string) => {
+    const newCategories = selectedCategories.filter(
+      (cat) => cat !== categoryToRemove
+    );
+    setSelectedCategories(newCategories);
     setFormData((prev) => ({
       ...prev,
-      tag: prev.tag.includes(tagValue)
-        ? prev.tag.filter((t) => t !== tagValue)
-        : [...prev.tag, tagValue],
+      tag: newCategories,
     }));
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -123,229 +219,177 @@ export default function ResourceFormDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div
-        className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/90"
-        onClick={onClose}
-        aria-hidden="true"
-      ></div>
-
-      <div className="relative w-full max-w-lg mx-4 bg-gradient-to-b from-gray-900 to-black border border-gray-800/50 rounded-xl shadow-[0_0_25px_rgba(0,0,0,0.8)] overflow-hidden animate-scaleIn">
-        {/* Glow accent at the top */}
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-600/20 via-indigo-600/80 to-indigo-600/20"></div>
-
-        <div className="px-6 py-5 border-b border-gray-800/50 flex justify-between items-center bg-black/40 backdrop-blur-sm">
-          <h3 className="text-xl font-bold text-white">Add New Resource</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-indigo-400 transition-colors duration-300"
-            aria-label="Close dialog"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-900 backdrop-blur-md">
+      <div className="min-h-screen p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Add New Resource
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Share your favorite design resources with the community
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-blue-400 transition-colors duration-300 p-2"
+              aria-label="Close dialog"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
-        </div>
+              <X className="w-6 h-6" />
+            </button>
+          </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 space-y-6 bg-gradient-to-b from-black/20 to-black/40"
-        >
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
               {error}
             </div>
           )}
 
-          <div className="space-y-2">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Title <span className="text-indigo-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              placeholder="e.g., Design System Resources"
-              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Description <span className="text-indigo-500">*</span>
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={3}
-              placeholder="Brief description of the resource..."
-              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
-            ></textarea>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Resource Image <span className="text-indigo-500">*</span>
-            </label>
-            <ImageUpload
-              value={formData.imageUrl}
-              onChange={handleImageUpload}
-            />
-            {!formData.imageUrl && (
-              <p className="text-xs text-gray-500 mt-1">
-                Upload an image to represent your resource
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="link"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Resource Link <span className="text-indigo-500">*</span>
-            </label>
-            <input
-              type="url"
-              id="link"
-              name="link"
-              value={formData.link}
-              onChange={handleChange}
-              required
-              placeholder="e.g., https://designsystemresources.com"
-              className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-500 transition-all duration-300 shadow-inner"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">
-              Categories <span className="text-indigo-500">*</span>
-            </label>
-
-            {/* Custom Multi-Select Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full px-4 py-3 bg-black/70 border border-gray-800 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white transition-all duration-300 shadow-inner flex justify-between items-center"
-              >
-                <span className="text-left flex-1">
-                  {formData.tag.length > 0
-                    ? formData.tag.length === 1
-                      ? formData.tag[0]
-                      : `${formData.tag.length} categories selected`
-                    : "Select categories"}
-                </span>
-                <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Title Field */}
+              <Card className="border border-gray-800 shadow-lg bg-gray-800/50 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Type className="w-5 h-5 text-purple-500" />
+                    Resource Title
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Input
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Enter a descriptive title..."
+                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 h-12 text-base"
+                    required
                   />
-                </svg>
-              </button>
+                </CardContent>
+              </Card>
 
-              {/* Dropdown Options */}
-              {isDropdownOpen && (
-                <div className="absolute z-10 w-full bottom-full mb-1 bg-gray-900 border border-gray-800 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                  {resourceTags.map((tag) => (
-                    <label
-                      key={tag}
-                      className="flex items-center px-4 py-2 hover:bg-gray-800 cursor-pointer transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.tag.includes(tag)}
-                        onChange={() => handleTagToggle(tag)}
-                        className="w-4 h-4 text-indigo-600 bg-black/70 border-gray-600 rounded focus:ring-indigo-500 focus:ring-1 mr-3"
-                      />
-                      <span className="text-sm text-gray-300">{tag}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+              {/* Resource Link Field */}
+              <Card className="border border-gray-800 shadow-lg bg-gray-800/50 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Link2 className="w-5 h-5 text-blue-500" />
+                    Resource URL
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Input
+                    name="link"
+                    type="url"
+                    value={formData.link}
+                    onChange={handleChange}
+                    placeholder="https://example.com"
+                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 h-12 text-base"
+                    required
+                  />
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Selected Tags Display */}
-            {formData.tag.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tag.map((selectedTag) => (
-                  <span
-                    key={selectedTag}
-                    onClick={() => handleTagToggle(selectedTag)}
-                    className="inline-flex items-center px-2 py-1 text-xs bg-indigo-600/20 text-indigo-400 rounded-full border border-indigo-600/30 cursor-pointer hover:bg-indigo-600/30 transition-colors"
-                  >
-                    {selectedTag}
-                    <svg
-                      className="w-3 h-3 ml-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+            {/* Description Field */}
+            <Card className="border border-gray-800 shadow-lg bg-gray-800/50 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <FileText className="w-5 h-5 text-green-500" />
+                  Description
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Describe what makes this resource valuable and how others can use it..."
+                  className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 min-h-32 text-base resize-none"
+                  required
+                />
+              </CardContent>
+            </Card>
 
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 bg-black/60 border border-gray-800 rounded-lg hover:bg-gray-900 text-white font-medium transition-colors duration-300"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition-colors duration-300 shadow-lg shadow-indigo-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={
-                isSubmitting || !formData.imageUrl || formData.tag.length === 0
-              }
-            >
-              {isSubmitting ? "Adding..." : "Add Resource"}
-            </button>
-          </div>
-        </form>
+            {/* Resource Image Upload */}
+            <Card className="border border-gray-800 shadow-lg bg-gray-800/50 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Upload className="w-5 h-5 text-orange-500" />
+                  Resource Preview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload
+                  value={formData.imageUrl}
+                  onChange={handleImageUpload}
+                />
+                {!formData.imageUrl && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Upload an image to represent your resource
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Categories Selection */}
+            <Card className="border border-gray-800 shadow-lg bg-gray-800/50 backdrop-blur-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Tag className="w-5 h-5 text-indigo-500" />
+                  Categories
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <SearchableDropdown
+                  categories={[...resourceTags]}
+                  selectedCategories={selectedCategories}
+                  onCategorySelect={handleCategorySelect}
+                />
+
+                {selectedCategories.length > 0 && (
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-300">
+                      Selected Categories:
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCategories.map((category) => (
+                        <Badge
+                          key={category}
+                          className="px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 border-0"
+                        >
+                          {category}
+                          <button
+                            type="button"
+                            onClick={() => removeCategory(category)}
+                            className="ml-2 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Submit Button */}
+            <div className="flex justify-center pt-6">
+              <Button
+                type="submit"
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                disabled={
+                  isSubmitting ||
+                  !formData.imageUrl ||
+                  selectedCategories.length === 0
+                }
+              >
+                {isSubmitting ? "Adding..." : "Share Resource"}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

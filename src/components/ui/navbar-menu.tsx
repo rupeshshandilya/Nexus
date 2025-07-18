@@ -11,7 +11,7 @@ const transition = {
   stiffness: 100,
   restDelta: 0.001,
   restSpeed: 0.001,
-};
+} as const;
 
 interface HoveredLinkProps extends LinkProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export const MenuItem = ({
 }: {
   setActive: (item: string) => void;
   active: string | null;
-  item: string ;
+  item: string;
   children?: React.ReactNode;
   onClick?: () => void;
 }) => {

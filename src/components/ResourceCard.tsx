@@ -12,7 +12,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
 
   const handleCardClick = () => {
 
-    let countdown = 5;
+    let countdown = 3;
 
     // Show initial toast with countdown
     const { dismiss, update } = toast({

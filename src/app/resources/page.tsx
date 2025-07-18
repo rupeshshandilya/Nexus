@@ -150,7 +150,7 @@ export default function Explore() {
                   </Link>
 
                   <button
-                    className="flex items-center gap-1 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl lg:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
+                    className="flex items-center gap-1 sm:gap-2 bg-blue-600 hover:bg-blue-700 rounded-xl lg:rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 text-white transition-colors font-medium shadow-md text-sm sm:text-base"
                     onClick={() => setIsResourceFormOpen(true)}
                   >
                     <svg

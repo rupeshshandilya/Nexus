@@ -192,6 +192,14 @@ export default function MyResourcesPage() {
               <Button asChild>
                 <Link href="/sign-in">Sign In</Link>
               </Button>
+
+              <Button
+            className="mt-4 md:mt-0"
+            onClick={() => setIsResourceFormOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Resource
+          </Button>
             </div>
           </CardContent>
         </Card>

@@ -7,7 +7,7 @@ type SortOption = "A-Z" | "Z-A" | "Newest" | "Oldest";
 type FilterOption = "None" | ResourceTag;
 
 // Query keys for better cache management
-export const QUERY_KEYS = {
+const QUERY_KEYS = {
   resources: (sortBy: string, tag: string) => ["resources", sortBy, tag],
   userResources: () => ["user-resources"],
 } as const;

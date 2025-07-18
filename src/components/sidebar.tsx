@@ -40,7 +40,7 @@ const Sidebar = () => {
           </div>
           <input
             type="text"
-            className="bg-gray-900 w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-lg border border-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-300 placeholder-gray-500 transition-all text-sm md:text-base"
+            className="bg-gray-900 w-full pl-10 md:pl-12 pr-4 py-2.5 md:py-3 rounded-lg border border-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-300 placeholder-gray-500 transition-all text-sm md:text-base"
             placeholder="Search categories"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -61,15 +61,15 @@ const Sidebar = () => {
           {/* All option */}
           <div
             className={`flex items-center p-2.5 md:p-3 rounded-lg cursor-pointer transition-all duration-200 group hover:bg-gray-800 ${
-              filterBy === "None" ? "bg-purple-700 text-white shadow-lg" : ""
+              filterBy === "None" ? "bg-blue-600 text-white shadow-lg" : ""
             }`}
             onClick={() => setFilterBy("None")}
           >
             <div
               className={`rounded-full p-1.5 md:p-2 mr-3 md:mr-4 transition-colors flex-shrink-0 ${
                 filterBy === "None"
-                  ? "bg-purple-600"
-                  : "bg-gray-800 group-hover:bg-purple-700"
+                  ? "bg-blue-600"
+                  : "bg-gray-800 group-hover:bg-blue-700"
               }`}
             >
               <span
@@ -96,15 +96,15 @@ const Sidebar = () => {
             <div
               key={tag}
               className={`flex items-center p-2.5 md:p-3 rounded-lg cursor-pointer transition-all duration-200 group hover:bg-gray-800 ${
-                filterBy === tag ? "bg-purple-700 text-white shadow-lg" : ""
+                filterBy === tag ? "bg-blue-600 text-white shadow-lg" : ""
               }`}
               onClick={() => setFilterBy(tag as FilterOption)}
             >
               <div
                 className={`rounded-full p-1.5 md:p-2 mr-3 md:mr-4 transition-colors flex-shrink-0 ${
                   filterBy === tag
-                    ? "bg-purple-600"
-                    : "bg-gray-800 group-hover:bg-purple-700"
+                    ? "bg-blue-600"
+                    : "bg-gray-800 group-hover:bg-blue-700"
                 }`}
               >
                 <span
@@ -133,7 +133,7 @@ const Sidebar = () => {
               <p className="text-gray-500 text-sm">No categories found</p>
               <button
                 onClick={() => setSearchTerm("")}
-                className="mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Clear search
               </button>
