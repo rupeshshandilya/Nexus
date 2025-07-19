@@ -10,18 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,13 +24,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Edit, Trash2, ExternalLink, Plus, Search } from "lucide-react";
+import { Edit, Trash2, Plus, Search, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { Resource } from "../types";
 import Link from "next/link";
-import { resourceTags } from "@/constants/resourceTags";
+
 import { useRouter } from "next/navigation";
 import ResourceFormDialog from "../../components/Rdialog";
 import {
@@ -54,9 +45,7 @@ export default function MyResourcesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isResourceFormOpen, setIsResourceFormOpen] = useState(false);
-  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const { toast } = useToast();
 
   // Use React Query hooks
@@ -85,61 +74,76 @@ export default function MyResourcesPage() {
     return matchesSearch;
   });
 
-  const handleEditResource = (resource: Resource) => {
+  const handleCardClick = (resource: Resource) => {
+    let countdown = 3;
+
+    // Show initial toast with countdown
+    const { dismiss, update } = toast({
+      description: `Redirecting to ${resource.title} in ${countdown} seconds...`,
+      duration: 0, // Don't auto-dismiss, we'll control it manually
+    });
+
+    // Create countdown interval
+    const countdownInterval = setInterval(() => {
+      countdown--;
+
+      if (countdown > 0) {
+        // Update toast with new countdown
+        update({
+          description: `Redirecting to ${resource.title} in ${countdown} seconds...`,
+        });
+      } else {
+        // Countdown finished, redirect
+        clearInterval(countdownInterval);
+        dismiss();
+
+        // Ensure URL has protocol
+        let url = resource.link;
+        if (!url.match(/^https?:\/\//)) {
+          url = `https://${url}`;
+        }
+
+        try {
+          // Open in new tab
+          window.open(url, "_blank", "noopener,noreferrer");
+        } catch (error) {
+          console.error("Failed to open link:", error);
+          // Show error toast if opening fails
+          toast({
+            title: "Error",
+            description: `Failed to open ${resource.title}. Please try again.`,
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      }
+    }, 1000);
+
+    // Cleanup function in case component unmounts
+    return () => {
+      clearInterval(countdownInterval);
+      dismiss();
+    };
+  };
+
+  const handleEditResource = (resource: Resource, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when editing
     // Ensure tag is always an array for editing
     const resourceToEdit = {
       ...resource,
       tag: Array.isArray(resource.tag) ? resource.tag : [resource.tag],
     };
     setEditingResource(resourceToEdit);
-    setIsEditDialogOpen(true);
+    setIsResourceFormOpen(true);
   };
 
-  const handleTagToggle = (tagValue: string) => {
-    if (!editingResource) return;
-
-    const currentTags = Array.isArray(editingResource.tag)
-      ? editingResource.tag
-      : [editingResource.tag];
-    const newTags = currentTags.includes(tagValue)
-      ? currentTags.filter((t) => t !== tagValue)
-      : [...currentTags, tagValue];
-
-    setEditingResource({
-      ...editingResource,
-      tag: newTags,
-    });
-  };
-
-  const handleSaveResource = async () => {
-    if (!editingResource) return;
-
-    try {
-      await updateResourceMutation.mutateAsync({
-        id: editingResource.id,
-        title: editingResource.title,
-        description: editingResource.description,
-        imageUrl: editingResource.imageUrl,
-        link: editingResource.link,
-        tag: editingResource.tag,
-      });
-
-      setIsEditDialogOpen(false);
-      setEditingResource(null);
-      toast({
-        title: "Resource updated",
-        description: "Your resource has been successfully updated.",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to update resource. Please try again.",
-        variant: "destructive",
-      });
+  const handleDeleteResource = async (
+    resourceId: string,
+    e?: React.MouseEvent
+  ) => {
+    if (e) {
+      e.stopPropagation(); // Prevent card click when deleting
     }
-  };
-
-  const handleDeleteResource = async (resourceId: string) => {
     try {
       await deleteResourceMutation.mutateAsync(resourceId);
       toast({
@@ -157,19 +161,42 @@ export default function MyResourcesPage() {
   };
 
   const handleAddResource = async (
-    newResource: Omit<Resource, "id" | "userId">
+    resourceData: Omit<Resource, "id" | "userId">
   ) => {
     try {
-      await createResourceMutation.mutateAsync(newResource);
+      if (editingResource) {
+        // Update existing resource
+        await updateResourceMutation.mutateAsync({
+          id: editingResource.id,
+          title: resourceData.title,
+          description: resourceData.description,
+          imageUrl: resourceData.imageUrl,
+          link: resourceData.link,
+          tag: resourceData.tag,
+        });
+        toast({
+          title: "Resource updated",
+          description: "Your resource has been successfully updated.",
+        });
+      } else {
+        // Create new resource
+        await createResourceMutation.mutateAsync(resourceData);
+        toast({
+          title: "Resource created",
+          description: "Your resource has been successfully created.",
+        });
+      }
+
       setIsResourceFormOpen(false);
-      toast({
-        title: "Resource created",
-        description: "Your resource has been successfully created.",
-      });
+      setEditingResource(null);
       return { success: true };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create resource";
+        error instanceof Error
+          ? error.message
+          : editingResource
+          ? "Failed to update resource"
+          : "Failed to create resource";
       toast({
         title: "Error",
         description: errorMessage,
@@ -181,25 +208,22 @@ export default function MyResourcesPage() {
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white flex items-center justify-center">
+        <Card className="w-full max-w-md bg-gray-900 bg-opacity-40 backdrop-blur-sm border-gray-800">
           <CardContent className="pt-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Sign in required</h2>
-              <p className="text-muted-foreground mb-4">
+              <h2 className="text-2xl font-bold mb-2 text-white">
+                Sign in required
+              </h2>
+              <p className="text-gray-400 mb-4">
                 Please sign in to view and manage your resources.
               </p>
-              <Button asChild>
+              <Button
+                asChild
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 <Link href="/sign-in">Sign In</Link>
               </Button>
-
-              <Button
-            className="mt-4 md:mt-0"
-            onClick={() => setIsResourceFormOpen(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Resource
-          </Button>
             </div>
           </CardContent>
         </Card>
@@ -208,7 +232,7 @@ export default function MyResourcesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
@@ -216,18 +240,21 @@ export default function MyResourcesPage() {
             <Button
               variant="ghost"
               onClick={() => router.back()}
-              className="mb-4 md:mb-0"
+              className="mb-4 md:mb-0 text-gray-300 hover:text-white hover:bg-gray-800"
             >
               &larr; Back
             </Button>
-            <h1 className="text-3xl font-bold mb-2">My Resources</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-3xl font-bold mb-2 text-white">My Resources</h1>
+            <p className="text-gray-400">
               Manage your uploaded resources - edit, delete, or add new ones
             </p>
           </div>
           <Button
-            className="mt-4 md:mt-0"
-            onClick={() => setIsResourceFormOpen(true)}
+            className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              setEditingResource(null);
+              setIsResourceFormOpen(true);
+            }}
           >
             <Plus className="w-4 h-4 mr-2" />
             Add New Resource
@@ -237,26 +264,28 @@ export default function MyResourcesPage() {
         {/* Search and Filter */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search resources..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-gray-900 border-gray-800 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-8">
-          <Card>
+          <Card className="bg-gray-900 bg-opacity-40 backdrop-blur-sm border-gray-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-gray-300">
                 Total Resources
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{resources.length}</div>
+              <div className="text-2xl font-bold text-white">
+                {resources.length}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -283,14 +312,20 @@ export default function MyResourcesPage() {
         {!isLoading &&
           !error &&
           (resources.length === 0 ? (
-            <Card className="text-center py-12">
+            <Card className="text-center py-12 bg-gray-900 bg-opacity-40 backdrop-blur-sm border-gray-800">
               <CardContent>
-                <div className="text-muted-foreground mb-4">
+                <div className="text-gray-400 mb-4">
                   {searchTerm
                     ? "No resources match your search criteria."
                     : "You haven't uploaded any resources yet."}
                 </div>
-                <Button onClick={() => setIsResourceFormOpen(true)}>
+                <Button
+                  onClick={() => {
+                    setEditingResource(null);
+                    setIsResourceFormOpen(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Your First Resource
                 </Button>
@@ -301,87 +336,88 @@ export default function MyResourcesPage() {
               {filteredResources.map((resource) => (
                 <Card
                   key={resource.id}
-                  className="group hover:shadow-lg transition-shadow"
+                  className="bg-gray-900 bg-opacity-40 backdrop-blur-sm rounded-xl overflow-hidden flex flex-col h-full border border-gray-800 transition-all duration-300 hover:border-gray-600 hover:shadow-[0_0_20px_rgba(75,75,75,0.15)] group cursor-pointer"
+                  onClick={() => handleCardClick(resource)}
                 >
                   <CardHeader className="p-0">
-                    <div className="relative overflow-hidden rounded-t-lg">
+                    <div className="relative h-56 w-full overflow-hidden">
                       <Image
                         src={resource.imageUrl || "/placeholder.svg"}
                         alt={resource.title}
                         width={300}
                         height={200}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90"></div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-4">
-                    <CardTitle className="mb-2 line-clamp-1">
-                      {resource.title}
-                    </CardTitle>
-                    <CardDescription className="mb-3 line-clamp-2">
+                  <CardContent className="p-6 flex flex-col flex-grow relative z-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <CardTitle className="text-xl font-bold text-white group-hover:text-gray-300 transition-colors duration-300 line-clamp-1">
+                        {resource.title}
+                      </CardTitle>
+                      <div className="text-gray-400 transition-colors p-1">
+                        <ExternalLink className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <CardDescription className="text-gray-400 flex-grow mb-4 line-clamp-2">
                       {resource.description}
                     </CardDescription>
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {Array.isArray(resource.tag) ? (
                         resource.tag.map((tag) => (
                           <Badge
                             key={tag}
-                            variant="outline"
-                            className="text-xs"
+                            className="text-xs bg-blue-600/20 text-blue-400 border-blue-600/30 hover:bg-blue-600/30"
                           >
                             {tag}
                           </Badge>
                         ))
                       ) : (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge className="text-xs bg-blue-600/20 text-blue-400 border-blue-600/30 hover:bg-blue-600/30">
                           {resource.tag}
                         </Badge>
                       )}
                     </div>
                   </CardContent>
-                  <CardFooter className="p-4 pt-0 flex gap-2">
+                  <CardFooter className="p-6 pt-0 flex gap-2 justify-end">
                     <Button
-                      variant="outline"
                       size="sm"
-                      asChild
-                      className="flex-1"
-                    >
-                      <a
-                        href={resource.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Visit
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditResource(resource)}
+                      onClick={(e) => handleEditResource(resource, e)}
+                      className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          size="sm"
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-red-600 hover:bg-red-700 text-white border-0"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="bg-gray-900 border-gray-800">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Resource</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-white">
+                            Delete Resource
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="text-gray-400">
                             Are you sure you want to delete &ldquo;
                             {resource.title}&rdquo;? This action cannot be
                             undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
+                            Cancel
+                          </AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => handleDeleteResource(resource.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={(e) =>
+                              handleDeleteResource(resource.id, e)
+                            }
+                            className="bg-red-600 hover:bg-red-700 text-white"
                           >
                             Delete
                           </AlertDialogAction>
@@ -394,174 +430,15 @@ export default function MyResourcesPage() {
             </div>
           ))}
 
-        {/* Edit Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Resource</DialogTitle>
-              <DialogDescription>
-                Update your resource information below.
-              </DialogDescription>
-            </DialogHeader>
-            {editingResource && (
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={editingResource.title}
-                    onChange={(e) =>
-                      setEditingResource({
-                        ...editingResource,
-                        title: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={editingResource.description}
-                    onChange={(e) =>
-                      setEditingResource({
-                        ...editingResource,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={3}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="link">URL</Label>
-                  <Input
-                    id="link"
-                    type="url"
-                    value={editingResource.link}
-                    onChange={(e) =>
-                      setEditingResource({
-                        ...editingResource,
-                        link: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    type="url"
-                    value={editingResource.imageUrl}
-                    onChange={(e) =>
-                      setEditingResource({
-                        ...editingResource,
-                        imageUrl: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="tag">Tags</Label>
-
-                  {/* Custom Multi-Select Dropdown */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsTagDropdownOpen(!isTagDropdownOpen)}
-                      className="w-full px-3 py-2 border rounded-md bg-background text-foreground flex justify-between items-center"
-                    >
-                      <span className="text-left flex-1">
-                        {editingResource.tag.length > 0
-                          ? editingResource.tag.length === 1
-                            ? editingResource.tag[0]
-                            : `${editingResource.tag.length} tags selected`
-                          : "Select tags"}
-                      </span>
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isTagDropdownOpen ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-
-                    {/* Dropdown Options */}
-                    {isTagDropdownOpen && (
-                      <div className="absolute z-10 w-full bottom-full mb-1 bg-background border rounded-md shadow-xl max-h-48 overflow-y-auto">
-                        {resourceTags.map((tag) => (
-                          <label
-                            key={tag}
-                            className="flex items-center px-3 py-2 hover:bg-muted cursor-pointer transition-colors"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={editingResource.tag.includes(tag)}
-                              onChange={() => handleTagToggle(tag)}
-                              className="w-4 h-4 mr-3 rounded"
-                            />
-                            <span className="text-sm">{tag}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Selected Tags Display */}
-                  {editingResource.tag.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {editingResource.tag.map((selectedTag) => (
-                        <span
-                          key={selectedTag}
-                          onClick={() => handleTagToggle(selectedTag)}
-                          className="inline-flex items-center px-2 py-1 text-xs bg-muted rounded-full cursor-pointer hover:bg-muted/80 transition-colors"
-                        >
-                          {selectedTag}
-                          <svg
-                            className="w-3 h-3 ml-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleSaveResource}>Save Changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         {/* Resource Form Dialog */}
         <ResourceFormDialog
           isOpen={isResourceFormOpen}
-          onClose={() => setIsResourceFormOpen(false)}
+          onClose={() => {
+            setIsResourceFormOpen(false);
+            setEditingResource(null);
+          }}
           onSubmit={handleAddResource}
+          editingResource={editingResource}
         />
       </div>
     </div>

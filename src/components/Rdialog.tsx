@@ -95,12 +95,14 @@ interface ResourceFormDialogProps {
   onSubmit: (
     resource: Omit<Resource, "id" | "userId">
   ) => Promise<{ success: boolean; error?: string }>;
+  editingResource?: Resource | null;
 }
 
 export default function ResourceFormDialog({
   isOpen,
   onClose,
   onSubmit,
+  editingResource,
 }: ResourceFormDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -114,7 +116,7 @@ export default function ResourceFormDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset form when dialog opens/closes
+  // Reset form when dialog opens/closes or populate with editing data
   useEffect(() => {
     if (!isOpen) {
       setFormData({
@@ -126,8 +128,33 @@ export default function ResourceFormDialog({
       });
       setSelectedCategories([]);
       setError(null);
+    } else if (editingResource) {
+      // Populate form with editing resource data
+      const tags = Array.isArray(editingResource.tag)
+        ? editingResource.tag
+        : [editingResource.tag];
+      setFormData({
+        title: editingResource.title,
+        description: editingResource.description,
+        imageUrl: editingResource.imageUrl,
+        link: editingResource.link,
+        tag: tags,
+      });
+      setSelectedCategories(tags);
+      setError(null);
+    } else {
+      // Reset for new resource
+      setFormData({
+        title: "",
+        description: "",
+        imageUrl: "",
+        link: "",
+        tag: [],
+      });
+      setSelectedCategories([]);
+      setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, editingResource]);
 
   // Close dialog when escape key is pressed
   useEffect(() => {
@@ -225,10 +252,12 @@ export default function ResourceFormDialog({
           <div className="flex items-center justify-between mb-8">
             <div className="text-center flex-1">
               <h1 className="text-4xl font-bold text-white mb-2">
-                Add New Resource
+                {editingResource ? "Edit Resource" : "Add New Resource"}
               </h1>
               <p className="text-gray-400 text-lg">
-                Share your favorite design resources with the community
+                {editingResource
+                  ? "Update your resource information below"
+                  : "Share your favorite design resources with the community"}
               </p>
             </div>
             <button
@@ -385,7 +414,13 @@ export default function ResourceFormDialog({
                   selectedCategories.length === 0
                 }
               >
-                {isSubmitting ? "Adding..." : "Share Resource"}
+                {isSubmitting
+                  ? editingResource
+                    ? "Updating..."
+                    : "Adding..."
+                  : editingResource
+                  ? "Update Resource"
+                  : "Share Resource"}
               </Button>
             </div>
           </form>
