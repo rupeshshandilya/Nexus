@@ -12,6 +12,7 @@ import { resourceTags } from "@/constants/resourceTags";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+import { Github, Mail } from "lucide-react";
 
 export default function Explore() {
   const { isSignedIn } = useAuth();
@@ -341,19 +342,7 @@ export default function Explore() {
                   href="mailto:rupeshkshandilya@gmail.com"
                   className="flex items-center gap-2 bg-gray-800/90 backdrop-blur-sm hover:bg-gray-700 rounded-lg px-3 py-2 text-white transition-colors font-medium shadow-lg text-sm border border-gray-700"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    ></path>
-                  </svg>
+                  <Mail className="h-4 w-4 text-white"/>
                   <span>Contact</span>
                 </a>
 
@@ -363,13 +352,7 @@ export default function Explore() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-gray-800/90 backdrop-blur-sm hover:bg-gray-700 rounded-lg px-3 py-2 text-white transition-colors font-medium shadow-lg text-sm border border-gray-700"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 10.956.69-.069-.069-.069-.069-.069-.069 0-.483-.07-.483-.07-.276-.138-.345-.276-.345-.552 0-.276.069-.621.138-.966.069-.345.138-.69.138-1.035 0-.69-.345-1.311-.828-1.656 2.553-.276 5.244-1.242 5.244-5.658 0-1.311-.483-2.346-1.242-3.107.138-.345.552-1.518-.138-3.107 0 0-1.035-.345-3.384 1.242-1.035-.276-2.139-.414-3.245-.414-1.104 0-2.209.138-3.245.414C4.495 7.521 3.46 7.866 3.46 7.866c-.69 1.59-.276 2.762-.138 3.107-.759.76-1.242 1.796-1.242 3.107 0 4.416 2.691 5.382 5.244 5.658-.345.276-.621.828-.621 1.656 0 1.173.069 2.346.069 2.691 0 .276-.207.552-.69.414C3.187 21.404.029 17.066.029 11.987.029 5.367 5.396.001 12.017.001z" />
-                  </svg>
+                 <Github className="h-4 w-4 text-white" />
                   <span>Contribute</span>
                 </a>
               </div>
