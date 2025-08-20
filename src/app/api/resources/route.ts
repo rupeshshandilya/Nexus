@@ -92,7 +92,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       status: 500,
       message: "Failed to fetch resources",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: `Something went wrong ${error}`    
     });
   }
 }
