@@ -2,6 +2,7 @@ import React from "react";
 import { Resource } from "../app/types";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { Github } from 'lucide-react';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -102,6 +103,10 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
           </div>
         </div>
         <p className="text-gray-400 flex-grow">{resource.description}</p>
+        <div className="flex items-center gap-2 mt-2">
+          <Github className="h-4 w-4 text-gray-500" />
+          <p className="text-gray-500 text-sm">{resource.user?.userName}</p>
+        </div>
         {resource.link && (
           <div className="mt-4 text-gray-500 text-sm truncate hover:text-gray-300 transition-colors duration-300">
             {resource.link.replace(/(^\w+:|^)\/\//, "")}
