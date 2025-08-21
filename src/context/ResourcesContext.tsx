@@ -16,8 +16,16 @@ interface ResourcesContextType {
   error: string | null;
   sortBy: SortOption;
   filterBy: FilterOption;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  searchQuery: string;
   setSortBy: (sort: SortOption) => void;
   setFilterBy: (filter: FilterOption) => void;
+  setCurrentPage: (page: number) => void;
+  setItemsPerPage: (limit: number) => void;
+  setSearchQuery: (search: string) => void;
   addResource: (
     resource: Omit<Resource, "id" | "userId">
   ) => Promise<{ success: boolean; error?: string }>;
@@ -31,19 +39,27 @@ const ResourcesContext = createContext<ResourcesContextType | undefined>(
 export function ResourcesProvider({ children }: { children: React.ReactNode }) {
   const [sortBy, setSortBy] = useState<SortOption>("Newest");
   const [filterBy, setFilterBy] = useState<FilterOption>("None");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Use React Query hook for fetching resources
+  // Use React Query hook for fetching resources with pagination and search
   const {
-    data: resources = [],
+    data,
     isLoading,
     error: queryError,
     refetch,
-  } = useResourcesQuery(sortBy, filterBy);
+  } = useResourcesQuery(sortBy, filterBy, currentPage, itemsPerPage, searchQuery);
 
   // Use React Query mutation for creating resources
   const createResourceMutation = useCreateResourceMutation();
 
   const error = queryError?.message || null;
+
+  // Extract data from the new API response structure
+  const resources = data?.resources || [];
+  const totalPages = data?.pagination?.pages || 1;
+  const totalItems = data?.pagination?.total || 0;
 
   const addResource = async (
     newResource: Omit<Resource, "id" | "userId">
@@ -62,14 +78,43 @@ export function ResourcesProvider({ children }: { children: React.ReactNode }) {
     await refetch();
   };
 
+  // Reset to page 1 when filters/search change to avoid empty results
+  const handleSortByChange = (sort: SortOption) => {
+    setSortBy(sort);
+    setCurrentPage(1);
+  };
+
+  const handleFilterByChange = (filter: FilterOption) => {
+    setFilterBy(filter);
+    setCurrentPage(1);
+  };
+
+  const handleSearchQueryChange = (search: string) => {
+    setSearchQuery(search);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    setItemsPerPage(limit);
+    setCurrentPage(1);
+  };
+
   const value = {
     resources,
     isLoading: isLoading || createResourceMutation.isPending,
     error,
     sortBy,
     filterBy,
-    setSortBy,
-    setFilterBy,
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+    searchQuery,
+    setSortBy: handleSortByChange,
+    setFilterBy: handleFilterByChange,
+    setCurrentPage,
+    setItemsPerPage: handleItemsPerPageChange,
+    setSearchQuery: handleSearchQueryChange,
     addResource,
     fetchResources,
   };

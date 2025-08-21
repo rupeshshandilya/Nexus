@@ -6,14 +6,35 @@ import { ResourceTag } from "@/constants/resourceTags";
 type SortOption = "A-Z" | "Z-A" | "Newest" | "Oldest";
 type FilterOption = "None" | ResourceTag;
 
-// Query keys for better cache management
+// Add pagination types
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+interface ResourcesResponse {
+  resources: Resource[];
+  pagination: PaginationInfo;
+  message: string;
+}
+
+// Query keys for better cache management - now includes pagination
 const QUERY_KEYS = {
-  resources: (sortBy: string, tag: string) => ["resources", sortBy, tag],
+  resources: (sortBy: string, tag: string, page: number, limit: number, search?: string) => 
+    ["resources", sortBy, tag, page, limit, search],
   userResources: () => ["user-resources"],
 } as const;
 
-// Fetch all resources with sorting and filtering
-export function useResourcesQuery(sortBy: SortOption, filterBy: FilterOption) {
+// Fetch all resources with sorting, filtering, pagination, and search
+export function useResourcesQuery(
+  sortBy: SortOption, 
+  filterBy: FilterOption, 
+  page: number = 1, 
+  limit: number = 10,
+  search?: string
+) {
   const sortMap: Record<SortOption, string> = {
     "A-Z": "title-asc",
     "Z-A": "title-desc",
@@ -24,17 +45,24 @@ export function useResourcesQuery(sortBy: SortOption, filterBy: FilterOption) {
   const tag = filterBy === "None" ? "all" : filterBy;
 
   return useQuery({
-    queryKey: QUERY_KEYS.resources(sortMap[sortBy], tag),
-    queryFn: async () => {
-      const response = await axios.get("/api/resources", {
-        params: {
-          sortBy: sortMap[sortBy],
-          tag,
-        },
-      });
+    queryKey: QUERY_KEYS.resources(sortMap[sortBy], tag, page, limit, search),
+    queryFn: async (): Promise<ResourcesResponse> => {
+      const params: Record<string, string> = {
+        sortBy: sortMap[sortBy],
+        tag,
+        page: page.toString(),
+        limit: limit.toString(),
+      };
 
-      if (response.data.status === 200) {
-        return response.data.resources as Resource[];
+      if (search && search.trim()) {
+        params.search = search.trim();
+      }
+
+      const response = await axios.get("/api/resources", { params });
+
+      // Handle the new response structure (no status in body)
+      if (response.status === 200) {
+        return response.data as ResourcesResponse;
       } else {
         throw new Error("Failed to fetch resources");
       }
@@ -85,7 +113,7 @@ export function useCreateResourceMutation() {
       }
     },
     onSuccess: (newResource) => {
-      // Invalidate and refetch resources queries
+      // Invalidate all resources queries to refetch with new data
       queryClient.invalidateQueries({ queryKey: ["resources"] });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.userResources() });
 
@@ -152,7 +180,7 @@ export function useDeleteResourceMutation() {
       }
     },
     onSuccess: (deletedResourceId) => {
-      // Invalidate and refetch queries
+      // Invalidate all resources queries
       queryClient.invalidateQueries({ queryKey: ["resources"] });
 
       // Remove the deleted resource from cache
