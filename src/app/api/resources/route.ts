@@ -72,6 +72,8 @@ export async function GET(req: Request) {
       message: "Resources fetched successfully",
     }, { status: 200 });
   } catch (error) {
+    console.log(`Error: ${error}`);
+    
     return NextResponse.json({
       status: 500,
       message: "Failed to fetch resources",
